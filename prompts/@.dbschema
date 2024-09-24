@@ -1,0 +1,97 @@
+// Supabase Database Schema
+
+// User Listings Table
+interface UserListing {
+  listing_id: string; // UUID, primary key
+  created_at: string; // Timestamp with time zone, default: now()
+  source: string; // Text, not null
+  date_listed: string; // Date, not null
+  date_noticed: string; // Date, not null
+  vin: string; // Text, not null
+  stock_number: string; // Text, not null
+  year: number; // Integer, not null
+  make: string; // Text, not null
+  model: string; // Text, not null
+  trim: string; // Text, not null
+  price: number; // Integer, not null
+  mileage: number; // Integer, not null
+  exterior_color: string; // Text, not null
+  interior_color: string; // Text, not null
+  transmission: string; // Text, not null
+  drivetrain: string; // Text, not null
+  fuel_type: string; // Text, not null
+  accidents_or_damage: string; // Text, not null
+  number_of_owners: number; // Integer, not null
+  title_status: string; // Text, not null
+  vehicle_description: string; // Text, not null
+  vehicle_report_url: string; // Text, not null
+  days_on_market: number; // Integer, not null
+  auction_type: string; // Text, not null
+  auction_end: string; // Date, not null
+  auction_status: string; // Text, not null
+  sold_price: number; // Integer, not null
+  sold_date: string; // Date, not null
+  condition: string; // Text, not null
+  location: string; // Text, not null
+  lot_number: string; // Text, not null
+  photos: string; // Text, not null
+  additional_details: string; // Text, not null
+  features: string; // Text, not null
+  user_id: string; // UUID, foreign key to users.id
+  listing_type: string; // Text, not null
+}
+
+// Bot Listing Table
+interface BotListing {
+    listing_id: string; // UUID, primary key
+    created_at: string; // Timestamp with time zone, default: now()
+    user_id: string; // UUID, foreign key to users.id
+    source: string; // Text, not null
+    url: string; // Text, not null
+    listing_type: string; // Text, not null
+    date_listed: string; // Date, not null
+    date_noticed: string; // Date, not null
+    vin: string; // Text, not null
+    stock_number: string; // Text, not null
+    lot_number: string; // Text, not null
+    year: number; // Integer, not null
+    make: string; // Text, not null
+    model: string; // Text, not null
+    trim: string; // Text, not null
+    location: string; // Text, not null
+    price: number; // Integer, not null
+    sold_date: string; // Date, not null
+    mileage: number; // Integer, not null
+    exterior_color: string; // Text, not null
+    interior_color: string; // Text, not null
+    transmission: string; // Text, not null
+    drivetrain: string; // Text, not null
+    fuel_type: string; // Text, not null
+    accidents_or_damage: string; // Text, not null
+    number_of_owners: number; // Integer, not null
+    title_status: string; // Text, not null
+    seller_type: string; // Text, not null
+    seller_username: string; // Text, not null
+    dealership_name: string; // Text, not null
+    dealership_address: string; // Text, not null
+    dealership_phone: string; // Text, not null
+    dealership_website: string; // Text, not null
+    seller_notes: string; // Text, not null
+    vehicle_description: string; // Text, not null
+    vehicle_report_url: string; // Text, not null
+    condition: string; // Text, not null
+    days_on_market: number; // Integer, not null
+    average_market_price: number; // Integer, not null
+    auction_type: string; // Text, not null
+    auction_end: string; // Date, not null
+    photos: string; // Text, not null
+    price_history: string; // Text, not null
+    additional_details: string; // Text, not null
+    features: string; // Text, not null
+    listing_title: string; // Text, not null
+}
+
+
+// Relationships
+
+// Working
