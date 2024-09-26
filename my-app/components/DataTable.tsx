@@ -15,11 +15,23 @@ interface CarData {
     drivetrain: string | null;
 }
 
-interface DataTableProps {
-    data: CarData[];
+interface Filters {
+    trim: string | null;
+    mileage: number | null;
+    exteriorColor: string | null;
+    interiorColor: string | null;
+    transmission: string | null;
+    drivetrain: string | null;
 }
 
-const DataTable: React.FC<DataTableProps> = ({ data }) => {
+interface DataTableProps {
+    data: CarData[];
+    filters?: Filters; // Make filters optional
+    startDate: Date | null;
+    endDate: Date | null;
+}
+
+const DataTable: React.FC<DataTableProps> = ({ data, startDate, endDate }) => {
     const [sortColumn, setSortColumn] = useState<keyof CarData | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -57,6 +69,9 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
             <table className="min-w-full bg-gray-900 text-white table-fixed">
                 <thead>
                     <tr className="bg-gray-800">
+                        <th className="px-4 py-2 text-left whitespace-normal">
+                            Index
+                        </th>
                         {Object.keys(data[0] || {}).map((key) => (
                             <th
                                 key={key}
@@ -72,6 +87,9 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
                 <tbody>
                     {sortedData.map((item, index) => (
                         <tr key={index} className={index % 2 === 0 ? 'bg-gray-950' : 'bg-gray-900'}>
+                            <td className="px-4 py-2 whitespace-normal break-words">
+                                {index + 1}
+                            </td>
                             {Object.values(item).map((value, valueIndex) => (
                                 <td key={valueIndex} className="px-4 py-2 whitespace-normal break-words">
                                     {value !== null ? String(value) : 'N/A'}

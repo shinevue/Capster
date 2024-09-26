@@ -20,19 +20,6 @@ interface CarData {
 
 interface LineChartComponentProps {
     data: CarData[];
-    filters: {
-        trim: string | null;
-        mileage: number | null;
-        exteriorColor: string | null;
-        interiorColor: string | null;
-        transmission: string | null;
-        drivetrain: string | null;
-        period: 'day' | 'week' | 'month';
-        periodCount: number;
-        startDate: Date | null;
-        endDate: Date | null;
-    };
-    onTimeFilterChange: (period: 'day' | 'week' | 'month', periodCount: number) => void;
     chartType: '$ Change' | 'Total Listings' | 'Average days on market' | 'Average price';
     onDataSelection: (data: CarData[]) => void;
     onTimeSelection: (startDate: Date, endDate: Date) => void;
@@ -62,36 +49,13 @@ function formatPrice(value: number): string {
     return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export function LineChartComponent({ data, filters, onTimeFilterChange, chartType, onDataSelection, onTimeSelection, startDate, endDate }: LineChartComponentProps) {
-    const [localPeriod, setLocalPeriod] = useState(filters.period);
-    const [localPeriodCount, setLocalPeriodCount] = useState(filters.periodCount);
+export function LineChartComponent({ data, chartType, onDataSelection, onTimeSelection, startDate, endDate }: LineChartComponentProps) {
+    // Remove the filtering logic from here
 
-    const { filteredData, chartData, entriesInTimeRange, totalEntries } = useMemo(() => {
-        const filteredData = data.filter(car => {
-            const matchesColor = (carColor: string | null, filterColor: string | null) => {
-                if (!filterColor || !carColor) return true;
-                return carColor.toLowerCase().includes(filterColor.toLowerCase());
-            };
-
-            const carDate = car.date_listed ? new Date(car.date_listed) : null;
-            const isInTimeRange = carDate && startDate && endDate
-                ? carDate >= startDate && carDate <= endDate
-                : true;
-
-            return (
-                (!filters.trim || car.trim === filters.trim) &&
-                (!filters.mileage || car.mileage <= filters.mileage) &&
-                matchesColor(car.exterior_color, filters.exteriorColor) &&
-                matchesColor(car.interior_color, filters.interiorColor) &&
-                (!filters.transmission || car.transmission === filters.transmission) &&
-                (!filters.drivetrain || car.drivetrain === filters.drivetrain) &&
-                isInTimeRange
-            );
-        });
-
+    const { chartData, entriesInTimeRange, totalEntries } = useMemo(() => {
         const counts: { [key: string]: { count: number; totalPrice: number; priceCount: number; totalDaysOnMarket: number; listings: CarData[]; }; } = {};
 
-        filteredData.forEach(car => {
+        data.forEach(car => {
             if (car.date_listed) {
                 const date = parseDate(car.date_listed);
                 if (!date) return; // Skip if date is invalid
@@ -111,18 +75,6 @@ export function LineChartComponent({ data, filters, onTimeFilterChange, chartTyp
             }
         });
 
-        // Focus on 2024-09-18
-        const focusDate = '2024-09-17';
-        if (counts[focusDate]) {
-            console.log(`Listings on ${focusDate}:`, counts[focusDate].listings);
-            console.log(`Total listings on ${focusDate}:`, counts[focusDate].count);
-            console.log(`Listings with price on ${focusDate}:`, counts[focusDate].priceCount);
-            console.log(`Total price on ${focusDate}:`, counts[focusDate].totalPrice);
-            console.log(`Average price on ${focusDate}:`, counts[focusDate].totalPrice / counts[focusDate].priceCount);
-        } else {
-            console.log(`No listings found on ${focusDate}`);
-        }
-
         const chartData = Object.entries(counts)
             .map(([date, data]) => ({
                 date,
@@ -133,13 +85,11 @@ export function LineChartComponent({ data, filters, onTimeFilterChange, chartTyp
             .sort((a, b) => a.date.localeCompare(b.date));
 
         return {
-            filteredData,
             chartData,
-            entriesInTimeRange: filteredData.length,
-            totalEntries: data.length
+            entriesInTimeRange: data.length,
+            totalEntries: data.length // This will now be the same as entriesInTimeRange
         };
-    }, [data, filters, startDate, endDate]);
-
+    }, [data]);
 
     const getYAxisData = () => {
         switch (chartType) {
@@ -233,32 +183,6 @@ export function LineChartComponent({ data, filters, onTimeFilterChange, chartTyp
                     />
                 </LineChart>
             </ResponsiveContainer>
-            <div className="mt-6 flex justify-center items-center space-x-4">
-                <select
-                    className="p-2 bg-gray-800 text-gray-300 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={localPeriod}
-                    onChange={(e) => {
-                        const newPeriod = e.target.value as 'day' | 'week' | 'month';
-                        setLocalPeriod(newPeriod);
-                        onTimeFilterChange(newPeriod, localPeriodCount);
-                    }}
-                >
-                    <option value="day">Days</option>
-                    <option value="week">Weeks</option>
-                    <option value="month">Months</option>
-                </select>
-                <input
-                    type="number"
-                    className="p-2 bg-gray-800 text-gray-300 border border-gray-700 rounded-lg w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={localPeriodCount}
-                    onChange={(e) => {
-                        const newCount = Math.max(1, parseInt(e.target.value) || 1);
-                        setLocalPeriodCount(newCount);
-                        onTimeFilterChange(localPeriod, newCount);
-                    }}
-                    min="1"
-                />
-            </div>
         </div>
     );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Footer from "@/components/layout/Footer";
 import { LineChartComponent } from "@/components/charts/LineChart";
 import { FilterModal } from "@/components/FilterModal";
 import lineChartData from "@/data/lineChartData.json";
 import DataTable from "@/components/DataTable";
+import KPICards from "@/components/KPICards";
 
 interface Filters {
     trim: string | null;
@@ -53,6 +54,12 @@ export default function Home() {
     });
     const [chartType, setChartType] = useState<ChartType>('$ Change');
     const [selectedData, setSelectedData] = useState<CarData[]>([]);
+    const [kpiData, setKpiData] = useState({
+        dollarChange: 0,
+        totalListings: 0,
+        averageDaysOnMarket: 0,
+        averagePrice: 0,
+    });
 
     const handleTimeFilterChange = (newPeriod: 'day' | 'week' | 'month', newPeriodCount: number) => {
         const endDate = new Date();
@@ -113,6 +120,91 @@ export default function Home() {
         }
     }, []);
 
+    // Function to calculate KPIs based on filtered data
+    const calculateKPIs = (data: CarData[]) => {
+        console.log('Calculating KPIs for filtered data:', data);
+
+        const totalListings = data.length;
+        console.log('Total Listings:', totalListings);
+
+        const totalPrice = data.reduce((sum, car) => sum + (car.price || 0), 0);
+        const averagePrice = totalPrice / totalListings;
+        console.log('Total Price:', totalPrice);
+        console.log('Average Price:', averagePrice);
+
+        // Calculate average days on market
+        const now = new Date();
+        const totalDaysOnMarket = data.reduce((sum, car) => {
+            if (car.date_listed) {
+                const listedDate = new Date(car.date_listed);
+                const daysOnMarket = (now.getTime() - listedDate.getTime()) / (1000 * 3600 * 24);
+                console.log(`Car listed on ${car.date_listed} has been on market for ${daysOnMarket.toFixed(2)} days`);
+                return sum + daysOnMarket;
+            }
+            return sum;
+        }, 0);
+        const averageDaysOnMarket = totalDaysOnMarket / totalListings;
+        console.log('Total Days on Market:', totalDaysOnMarket);
+        console.log('Average Days on Market:', averageDaysOnMarket);
+
+        // Calculate dollar change (assuming the first and last entries represent the change)
+        let dollarChange = 0;
+        if (data.length > 1) {
+            const firstPrice = data[0].price || 0;
+            const lastPrice = data[data.length - 1].price || 0;
+            dollarChange = lastPrice - firstPrice;
+            console.log('First Price:', firstPrice);
+            console.log('Last Price:', lastPrice);
+            console.log('Dollar Change:', dollarChange);
+        } else {
+            console.log('Not enough data to calculate dollar change');
+        }
+
+        setKpiData({
+            dollarChange,
+            totalListings,
+            averageDaysOnMarket,
+            averagePrice,
+        });
+
+        console.log('Final KPI Data:', {
+            dollarChange,
+            totalListings,
+            averageDaysOnMarket,
+            averagePrice,
+        });
+    };
+
+    // New memoized filtered data
+    const filteredData = useMemo(() => {
+        return lineChartData.filter(car => {
+            const carDate = car.date_listed ? new Date(car.date_listed) : null;
+            const isInTimeRange = carDate && filters.startDate && filters.endDate
+                ? carDate >= filters.startDate && carDate <= filters.endDate
+                : true;
+
+            const matchesColor = (carColor: string | null, filterColor: string | null) => {
+                if (!filterColor || !carColor) return true;
+                return carColor.toLowerCase().includes(filterColor.toLowerCase());
+            };
+
+            return (
+                (!filters.trim || car.trim === filters.trim) &&
+                (!filters.mileage || (car.mileage !== null && car.mileage <= filters.mileage)) &&
+                matchesColor(car.exterior_color, filters.exteriorColor) &&
+                matchesColor(car.interior_color, filters.interiorColor) &&
+                (!filters.transmission || car.transmission === filters.transmission) &&
+                (!filters.drivetrain || car.drivetrain === filters.drivetrain) &&
+                isInTimeRange
+            );
+        });
+    }, [filters]);
+
+    // Update KPIs when filtered data changes
+    useEffect(() => {
+        calculateKPIs(filteredData);
+    }, [filteredData]);
+
     return (
         <div className="min-h-screen w-screen flex flex-col bg-black text-white overflow-hidden">
             <main className="flex-grow flex flex-col p-4 md:p-8 overflow-hidden">
@@ -120,6 +212,13 @@ export default function Home() {
                     <h1 className="text-3xl md:text-5xl font-bold mb-8 text-center text-white">
                         Porsche 911 GT3 Sales
                     </h1>
+
+                    <KPICards
+                        dollarChange={kpiData.dollarChange}
+                        totalListings={kpiData.totalListings}
+                        averageDaysOnMarket={kpiData.averageDaysOnMarket}
+                        averagePrice={kpiData.averagePrice}
+                    />
 
                     <div className="mb-4 flex flex-wrap gap-2">
                         {activeFilters.map(([key, value]) => (
@@ -141,6 +240,24 @@ export default function Home() {
                             Open Filters
                         </button>
 
+                        <div className="flex items-center space-x-2">
+                            <select
+                                className="bg-gray-800 text-white rounded-md px-3 py-2"
+                                value={`${filters.period}-${filters.periodCount}`}
+                                onChange={(e) => {
+                                    const [period, count] = e.target.value.split('-');
+                                    handleTimeFilterChange(period as 'day' | 'week' | 'month', parseInt(count));
+                                }}
+                            >
+                                <option value="day-7">Last week</option>
+                                <option value="day-30">Last 30 days</option>
+                                <option value="month-3">Last 3 months</option>
+                                <option value="month-6">Last 6 months</option>
+                                <option value="month-12">Last 12 months</option>
+                                {/* Add more options as needed */}
+                            </select>
+                        </div>
+
                         <div className="flex flex-wrap justify-center gap-2">
                             {(['$ Change', 'Total Listings', 'Average days on market', 'Average price'] as const).map((type) => (
                                 <button
@@ -160,9 +277,7 @@ export default function Home() {
                     <div className="flex flex-col space-y-6 overflow-hidden">
                         <div className="bg-gray-950 rounded-lg p-4 shadow-inner">
                             <LineChartComponent
-                                data={lineChartData}
-                                filters={filters}
-                                onTimeFilterChange={handleTimeFilterChange}
+                                data={filteredData}
                                 chartType={chartType}
                                 onDataSelection={handleDataSelection}
                                 onTimeSelection={handleChartTimeSelection}
@@ -172,7 +287,11 @@ export default function Home() {
                         </div>
 
                         <div className="bg-gray-950 rounded-lg p-4 shadow-inner flex-grow overflow-auto">
-                            <DataTable data={selectedData.length > 0 ? selectedData : lineChartData} />
+                            <DataTable
+                                data={selectedData.length > 0 ? selectedData : filteredData}
+                                startDate={filters.startDate}
+                                endDate={filters.endDate}
+                            />
                         </div>
                     </div>
                 </div>
@@ -183,7 +302,7 @@ export default function Home() {
                 onClose={() => setIsModalOpen(false)}
                 onApplyFilters={setFilters}
                 data={lineChartData}
-                currentFilters={filters} // Pass current filters to the modal
+                currentFilters={filters}
             />
         </div>
     );

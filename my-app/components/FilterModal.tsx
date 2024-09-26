@@ -19,8 +19,9 @@ interface Filters {
     interiorColor: string | null;
     transmission: string | null;
     drivetrain: string | null;
-    period: 'day' | 'week' | 'month';
-    periodCount: number;
+    // Remove the following lines:
+    // period: 'day' | 'week' | 'month';
+    // periodCount: number;
 }
 
 interface CarData {
