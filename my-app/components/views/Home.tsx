@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Footer from "@/components/layout/Footer";
 import { LineChartComponent } from "@/components/charts/LineChart";
+import { ScatterChartComponent } from "@/components/charts/ScatterChart";
 import { FilterModal } from "@/components/FilterModal";
 import lineChartData from "@/data/lineChartData.json";
 import DataTable from "@/components/DataTable";
@@ -268,7 +269,15 @@ export default function Home() {
                                 endDate={filters.endDate}
                             />
                         </div>
-
+                        <div className="bg-gray-950 rounded-lg p-4 shadow-inner">
+                            <ScatterChartComponent
+                                data={filteredData}
+                                onDataSelection={handleDataSelection}
+                                onTimeSelection={handleChartTimeSelection}
+                                startDate={filters.startDate}
+                                endDate={filters.endDate}
+                            />
+                        </div>
                         <div className="bg-gray-950 rounded-lg p-4 shadow-inner flex-grow overflow-auto">
                             <DataTable
                                 data={selectedData.length > 0 ? selectedData : filteredData}
