@@ -52,7 +52,6 @@ export default function Home() {
         startDate: null,
         endDate: null,
     });
-    const [chartType, setChartType] = useState<ChartType>('$ Change');
     const [selectedData, setSelectedData] = useState<CarData[]>([]);
     const [kpiData, setKpiData] = useState({
         dollarChange: 0,
@@ -257,28 +256,12 @@ export default function Home() {
                                 {/* Add more options as needed */}
                             </select>
                         </div>
-
-                        <div className="flex flex-wrap justify-center gap-2">
-                            {(['$ Change', 'Total Listings', 'Average days on market', 'Average price'] as const).map((type) => (
-                                <button
-                                    key={type}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ease-in-out ${chartType === type
-                                        ? 'bg-white text-black'
-                                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                                        }`}
-                                    onClick={() => setChartType(type)}
-                                >
-                                    {type}
-                                </button>
-                            ))}
-                        </div>
                     </div>
 
                     <div className="flex flex-col space-y-6 overflow-hidden">
                         <div className="bg-gray-950 rounded-lg p-4 shadow-inner">
                             <LineChartComponent
                                 data={filteredData}
-                                chartType={chartType}
                                 onDataSelection={handleDataSelection}
                                 onTimeSelection={handleChartTimeSelection}
                                 startDate={filters.startDate}
