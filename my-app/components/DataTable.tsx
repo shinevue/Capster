@@ -8,7 +8,7 @@ interface CarData {
     model: string;
     trim: string | null;
     price: number | null;
-    mileage: number;
+    mileage: number | null;
     interior_color: string | null;
     exterior_color: string | null;
     transmission: string | null;
@@ -16,7 +16,7 @@ interface CarData {
 }
 
 interface DataTableProps {
-    data: CarData[];
+    data: CarData[] | [];
     startDate: Date | null;
     endDate: Date | null;
 }

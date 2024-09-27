@@ -394,7 +394,7 @@ export default function Home() {
                                 className="bg-white rounded-xl p-6 shadow-lg flex-grow overflow-auto"
                             >
                                 <DataTable
-                                    data={filteredData as CarData[]}
+                                    data={(filteredData as CarData[]) ?? []}
                                     startDate={filters.startDate}
                                     endDate={filters.endDate}
                                 />

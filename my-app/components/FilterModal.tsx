@@ -22,6 +22,11 @@ interface Filters {
     transmission: string | null;
     drivetrain: string | null;
     listing_type: string | null;
+    // Add these properties:
+    period: 'day' | 'week' | 'month' | 'custom';
+    periodCount: number;
+    startDate: Date | null;
+    endDate: Date | null;
 }
 
 interface CarData {
@@ -32,7 +37,7 @@ interface CarData {
     model: string;
     trim: string | null;
     price: number | null;
-    mileage: number;
+    mileage: number | null; // Change this line
     interior_color: string | null;
     exterior_color: string | null;
     transmission: string | null;
@@ -154,7 +159,7 @@ export function FilterModal({ isOpen, onClose, onApplyFilters, data, currentFilt
                                         >
                                             <option value="">All Trims</option>
                                             {uniqueOptions('trim').map((trim) => (
-                                                <option key={trim} value={trim}>
+                                                <option key={trim} value={trim ?? ""}>
                                                     {trim}
                                                 </option>
                                             ))}
@@ -259,7 +264,7 @@ export function FilterModal({ isOpen, onClose, onApplyFilters, data, currentFilt
                                         >
                                             <option value="">All Drivetrains</option>
                                             {uniqueOptions('drivetrain').map((drivetrain) => (
-                                                <option key={drivetrain} value={drivetrain}>
+                                                <option key={drivetrain} value={drivetrain ?? ""}>
                                                     {drivetrain}
                                                 </option>
                                             ))}
@@ -280,7 +285,7 @@ export function FilterModal({ isOpen, onClose, onApplyFilters, data, currentFilt
                                         >
                                             <option value="">All Listing Types</option>
                                             {uniqueOptions('listing_type').map((type) => (
-                                                <option key={type} value={type}>
+                                                <option key={type} value={type ?? ""}>
                                                     {type}
                                                 </option>
                                             ))}
