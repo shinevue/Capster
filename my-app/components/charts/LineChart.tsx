@@ -1,7 +1,7 @@
 "use client";
 
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { useMemo, useState } from "react";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useMemo } from "react";
 
 interface CarData {
     source: string;
@@ -11,7 +11,7 @@ interface CarData {
     model: string;
     trim: string | null;
     price: number | null;
-    mileage: number;
+    mileage: number | null;
     interior_color: string | null;
     exterior_color: string | null;
     transmission: string | null;
@@ -26,44 +26,42 @@ interface LineChartComponentProps {
     endDate: Date | null;
 }
 
-// Add this function at the top of your file
-function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
-}
+const formatDate = (date: Date): string => date.toISOString().split('T')[0];
 
-// Add this function at the top of your file, outside the component
-function parseDate(dateString: string): Date | null {
+const parseDate = (dateString: string | null): Date | null => {
+    if (!dateString) return null;
     const [month, day, year] = dateString.split('-').map(Number);
     if (isNaN(month) || isNaN(day) || isNaN(year)) {
         console.warn(`Invalid date format: ${dateString}`);
         return null;
     }
-    // Assume 21st century if year is two digits
     const fullYear = year < 100 ? 2000 + year : year;
-    return new Date(fullYear, month - 1, day);
-}
+    // Create the date using UTC to avoid timezone issues
+    return new Date(Date.UTC(fullYear, month - 1, day));
+};
 
-// Add this helper function at the top of your file
-function formatPrice(value: number): string {
-    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+const formatPrice = (value: number | null | undefined): string =>
+    value == null ? 'N/A' : `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export function LineChartComponent({ data, onDataSelection, onTimeSelection, startDate, endDate }: LineChartComponentProps) {
+export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate }: LineChartComponentProps) => {
     const { chartData, entriesInTimeRange, totalEntries } = useMemo(() => {
-        const counts: { [key: string]: { count: number; totalPrice: number; listings: CarData[]; }; } = {};
+        const counts: Record<string, { count: number; totalPrice: number; minPrice: number; maxPrice: number; listings: CarData[]; }> = {};
 
         data.forEach(car => {
             const date = parseDate(car.date_listed);
-            if (!date) return; // Skip if date is invalid
+            if (!date) return;
 
-            let key = formatDate(date);
+            // Use toISOString and split to get YYYY-MM-DD format
+            const key = date.toISOString().split('T')[0];
 
             if (!counts[key]) {
-                counts[key] = { count: 0, totalPrice: 0, listings: [] };
+                counts[key] = { count: 0, totalPrice: 0, minPrice: Infinity, maxPrice: -Infinity, listings: [] };
             }
             counts[key].count += 1;
             if (car.price !== null) {
                 counts[key].totalPrice += car.price;
+                counts[key].minPrice = Math.min(counts[key].minPrice, car.price);
+                counts[key].maxPrice = Math.max(counts[key].maxPrice, car.price);
             }
             counts[key].listings.push(car);
         });
@@ -72,7 +70,9 @@ export function LineChartComponent({ data, onDataSelection, onTimeSelection, sta
             .map(([date, data]) => ({
                 date,
                 count: data.count,
-                averagePrice: data.count > 0 ? data.totalPrice / data.count : 0,
+                averagePrice: data.count > 0 ? data.totalPrice / data.count : null,
+                minPrice: data.minPrice !== Infinity ? data.minPrice : null,
+                maxPrice: data.maxPrice !== -Infinity ? data.maxPrice : null,
             }))
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -83,58 +83,83 @@ export function LineChartComponent({ data, onDataSelection, onTimeSelection, sta
         };
     }, [data]);
 
-    const formatYAxis = (value: number) => {
-        return formatPrice(value);
+    // Check if the data is suitable for graphing
+    const isDataSuitable = chartData.length > 1 && chartData.some(entry => entry.averagePrice !== null);
+
+    const formatXAxis = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
+
+    const formatYAxis = (value: number) => formatPrice(value);
 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
+            const data = payload[0].payload;
             return (
-                <div className="custom-tooltip bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-700">
-                    <p className="label text-gray-300">{`Date: ${label}`}</p>
-                    <p className="value text-white">{`Average Price: ${formatPrice(payload[0].value)}`}</p>
-                    <p className="count text-gray-400">{`Listings: ${payload[0].payload.count}`}</p>
+                <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+                    <p className="label text-gray-700 font-bold mb-2">{`Date: ${label}`}</p>
+                    <p className="value text-gray-900">{`Average Price: ${formatPrice(data.averagePrice)}`}</p>
+                    <p className="count text-gray-600">{`Listings: ${data.count}`}</p>
+                    <p className="min-price text-gray-600">{`Min Price: ${formatPrice(data.minPrice)}`}</p>
+                    <p className="max-price text-gray-600">{`Max Price: ${formatPrice(data.maxPrice)}`}</p>
                 </div>
             );
         }
         return null;
     };
 
+    if (!isDataSuitable) {
+        return (
+            <div className="flex items-center justify-center h-[200px] bg-gray-100 rounded-lg">
+                <p className="text-gray-300 text-4xl">
+                    Not enough data to display the chart. Please adjust your filters.
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div className="relative">
-            <div className="absolute top-0 right-0 bg-white bg-opacity-75 p-2 rounded text-md text-black">
+            <div className="absolute top-0 right-0 bg-white bg-opacity-75 p-2 rounded text-lg text-black">
                 {entriesInTimeRange} / {totalEntries} entries
             </div>
             <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
                     <XAxis
                         dataKey="date"
-                        stroke="#888888"
-                        fontSize={12}
+                        stroke="#555555"
+                        fontSize={14}
                         tickLine={false}
                         axisLine={false}
                         padding={{ left: 30, right: 30 }}
+                        tickFormatter={formatXAxis}
+                        interval="preserveStartEnd"
+                        minTickGap={50}
                     />
                     <YAxis
-                        stroke="#888888"
-                        fontSize={12}
+                        stroke="#555555"
+                        fontSize={14}
                         tickLine={false}
                         axisLine={false}
-                        label={{ value: 'Average Price', angle: -90, position: 'insideLeft', fill: '#888888', fontSize: 14 }}
+                        label={{ value: 'Average Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
                         padding={{ top: 20, bottom: 20 }}
                         tickFormatter={formatYAxis}
+                        tick={{ textAnchor: 'end' }}
+                        width={100}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Line
                         type="monotone"
                         dataKey="averagePrice"
-                        stroke="#8884d8"
+                        stroke="#3b82f6"
                         strokeWidth={3}
-                        dot={{ r: 4, strokeWidth: 2 }}
-                        activeDot={{ r: 8, strokeWidth: 0 }}
+                        dot={{ r: 5, strokeWidth: 2 }}
+                        activeDot={{ r: 9, strokeWidth: 0 }}
                     />
                 </LineChart>
             </ResponsiveContainer>
         </div>
     );
-}
+};

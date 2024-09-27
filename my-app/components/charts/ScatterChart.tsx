@@ -1,6 +1,6 @@
 "use client";
 
-import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useMemo } from 'react';
 
 interface CarData {
@@ -11,7 +11,7 @@ interface CarData {
     model: string;
     trim: string | null;
     price: number | null;
-    mileage: number;
+    mileage: number | null;
     interior_color: string | null;
     exterior_color: string | null;
     transmission: string | null;
@@ -26,7 +26,7 @@ interface ScatterChartComponentProps {
     endDate: Date | null;
 }
 
-function parseDate(dateString: string | null): Date | null {
+const parseDate = (dateString: string | null): Date | null => {
     if (!dateString) return null;
     const [month, day, year] = dateString.split('-').map(Number);
     if (isNaN(month) || isNaN(day) || isNaN(year)) {
@@ -35,16 +35,15 @@ function parseDate(dateString: string | null): Date | null {
     }
     const fullYear = year < 100 ? 2000 + year : year;
     return new Date(fullYear, month - 1, day);
-}
+};
 
-function formatPrice(value: number): string {
-    return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+const formatPrice = (value: number): string =>
+    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export function ScatterChartComponent({ data, onDataSelection, onTimeSelection, startDate, endDate }: ScatterChartComponentProps) {
+export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate }: ScatterChartComponentProps) => {
     const scatterData = useMemo(() => {
         return data
-            .filter(car => car.date_listed && car.price !== null)
+            .filter(car => car.date_listed && car.price !== null && car.mileage !== null)
             .map(car => ({
                 x: parseDate(car.date_listed)?.getTime() || 0,
                 y: car.price,
@@ -54,79 +53,92 @@ export function ScatterChartComponent({ data, onDataSelection, onTimeSelection, 
             .sort((a, b) => a.x - b.x);
     }, [data]);
 
+    // Check if the data is suitable for graphing
+    const isDataSuitable = scatterData.length > 1;
+
     const formatXAxis = (timestamp: number) => {
-        return new Date(timestamp).toLocaleDateString();
+        const date = new Date(timestamp);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
-    const formatYAxis = (value: number) => {
-        return formatPrice(value);
-    };
+    const formatYAxis = (value: number) => formatPrice(value);
 
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div className="custom-tooltip bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700">
-                    <p className="label text-gray-300 font-bold mb-2">{`${data.year} ${data.make} ${data.model}`}</p>
-                    <p className="value text-white">{`Price: ${formatPrice(data.y)}`}</p>
-                    <p className="date text-gray-400">{`Listed: ${new Date(data.x).toLocaleDateString()}`}</p>
-                    <p className="mileage text-gray-400">{`Mileage: ${data.mileage.toLocaleString()} miles`}</p>
-                    <p className="trim text-gray-400">{`Trim: ${data.trim || 'N/A'}`}</p>
-                    <p className="exterior text-gray-400">{`Exterior: ${data.exterior_color || 'N/A'}`}</p>
-                    <p className="interior text-gray-400">{`Interior: ${data.interior_color || 'N/A'}`}</p>
-                    <p className="transmission text-gray-400">{`Transmission: ${data.transmission || 'N/A'}`}</p>
-                    <p className="drivetrain text-gray-400">{`Drivetrain: ${data.drivetrain || 'N/A'}`}</p>
+                <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+                    <p className="label text-gray-700 font-bold mb-2">{`${data.year} ${data.make} ${data.model}`}</p>
+                    <p className="value text-gray-900">{`Price: ${formatPrice(data.y)}`}</p>
+                    <p className="date text-gray-600">{`Listed: ${new Date(data.x).toLocaleDateString()}`}</p>
+                    <p className="mileage text-gray-600">{`Mileage: ${data.z.toLocaleString()} miles`}</p>
+                    <p className="trim text-gray-600">{`Trim: ${data.trim || 'N/A'}`}</p>
+                    <p className="exterior text-gray-600">{`Exterior: ${data.exterior_color || 'N/A'}`}</p>
+                    <p className="interior text-gray-600">{`Interior: ${data.interior_color || 'N/A'}`}</p>
+                    <p className="transmission text-gray-600">{`Transmission: ${data.transmission || 'N/A'}`}</p>
+                    <p className="drivetrain text-gray-600">{`Drivetrain: ${data.drivetrain || 'N/A'}`}</p>
                 </div>
             );
         }
         return null;
     };
 
+    if (!isDataSuitable) {
+        return (
+            <div className="flex items-center justify-center h-[200px] bg-gray-100 rounded-lg">
+                <p className="text-gray-300 text-4xl">
+                    Not enough data to display the scatter plot. Please adjust your filters.
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div className="relative">
-            <div className="absolute top-0 right-0 bg-white bg-opacity-75 p-2 rounded text-md text-black">
+            <div className="absolute top-0 right-0 bg-gray-100 p-2 rounded text-lg text-gray-700">
                 {scatterData.length} entries
             </div>
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
                     <XAxis
                         dataKey="x"
                         name="Date"
                         tickFormatter={formatXAxis}
                         type="number"
                         domain={['dataMin', 'dataMax']}
-                        stroke="#888888"
-                        fontSize={12}
+                        stroke="#555555"
+                        fontSize={14}
                         tickLine={false}
                         axisLine={false}
+                        padding={{ left: 30, right: 30 }}
+                        interval="preserveStartEnd"
+                        minTickGap={50}
                     />
                     <YAxis
                         dataKey="y"
                         name="Price"
                         tickFormatter={formatYAxis}
-                        stroke="#888888"
-                        fontSize={12}
+                        stroke="#555555"
+                        fontSize={14}
                         tickLine={false}
                         axisLine={false}
-                        label={{ value: 'Price', angle: -90, position: 'insideLeft', fill: '#888888', fontSize: 14 }}
+                        label={{ value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
+                        tick={{ textAnchor: 'end' }}
+                        width={100}
                     />
                     <ZAxis dataKey="z" range={[20, 60]} name="Mileage" />
                     <Tooltip content={<CustomTooltip />} />
-                    <Scatter
-                        name="Cars"
-                        data={scatterData}
-                        fill="#8884d8"
-                        shape="circle"
-                    >
+                    <Scatter name="Cars" data={scatterData} fill="#3b82f6" shape="circle">
                         {scatterData.map((entry, index) => (
                             <circle
                                 key={`circle-${index}`}
                                 cx={0}
                                 cy={0}
-                                r={6}
-                                fill="#8884d8"
+                                r={7}
+                                fill="#3b82f6"
                                 fillOpacity={0.6}
-                                stroke="#8884d8"
+                                stroke="#3b82f6"
                             />
                         ))}
                     </Scatter>
@@ -134,4 +146,4 @@ export function ScatterChartComponent({ data, onDataSelection, onTimeSelection, 
             </ResponsiveContainer>
         </div>
     );
-}
+};
