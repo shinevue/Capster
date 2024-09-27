@@ -1,11 +1,11 @@
-import { configureStore } from '@reduxjs/toolkit';
-import exampleReducer from './exampleSlice';
+// import { configureStore } from '@reduxjs/toolkit';
+// import exampleReducer from './exampleSlice';
 
-export const store = configureStore({
-  reducer: {
-    example: exampleReducer,
-  },
-});
+// export const store = configureStore({
+//   reducer: {
+//     example: exampleReducer,
+//   },
+// });
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+// export type RootState = ReturnType<typeof store.getState>;
+// export type AppDispatch = typeof store.dispatch;
