@@ -231,6 +231,10 @@ export default function Home() {
         calculateKPIs(filteredData);
     }, [filteredData]);
 
+    const handleApplyFilters = (newFilters: Filters) => {
+        setFilters(newFilters);
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -360,6 +364,7 @@ export default function Home() {
                                 <LineChartComponent
                                     data={filteredData}
                                     onTimeSelection={handleChartTimeSelection}
+                                    onDataSelection={() => { }}
                                     startDate={filters.startDate}
                                     endDate={filters.endDate}
                                 />
@@ -375,6 +380,7 @@ export default function Home() {
                                 <ScatterChartComponent
                                     data={filteredData}
                                     onTimeSelection={handleChartTimeSelection}
+                                    onDataSelection={() => { }}
                                     startDate={filters.startDate}
                                     endDate={filters.endDate}
                                 />
@@ -401,7 +407,7 @@ export default function Home() {
             <FilterModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onApplyFilters={setFilters}
+                onApplyFilters={handleApplyFilters}
                 data={lineChartData as CarData[]}
                 currentFilters={filters}
             />
