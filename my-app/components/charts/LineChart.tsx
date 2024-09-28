@@ -3,21 +3,7 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useMemo, useState } from "react";
 import { Switch } from '@headlessui/react';
-
-interface CarData {
-    source: string;
-    date_listed: string | null;
-    year: string;
-    make: string;
-    model: string;
-    trim: string | null;
-    price: number | null;
-    mileage: number | null;
-    interior_color: string | null;
-    exterior_color: string | null;
-    transmission: string | null;
-    drivetrain: string | null;
-}
+import { CarData } from '@/types/CarData';
 
 interface LineChartComponentProps {
     data: CarData[];

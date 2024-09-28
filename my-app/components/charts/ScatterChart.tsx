@@ -1,22 +1,8 @@
 "use client";
 
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { useMemo } from 'react';
-
-interface CarData {
-    source: string;
-    date_listed: string | null;
-    year: string;
-    make: string;
-    model: string;
-    trim: string | null;
-    price: number | null;
-    mileage: number | null;
-    interior_color: string | null;
-    exterior_color: string | null;
-    transmission: string | null;
-    drivetrain: string | null;
-}
+import { useMemo, useEffect } from 'react';
+import { CarData } from '@/types/CarData';
 
 interface ScatterChartComponentProps {
     data: CarData[];
@@ -24,6 +10,7 @@ interface ScatterChartComponentProps {
     onTimeSelection: (startDate: Date, endDate: Date) => void;
     startDate: Date | null;
     endDate: Date | null;
+    imageLoader: (src: string) => string;
 }
 
 const parseDate = (dateString: string | null): Date | null => {
@@ -40,7 +27,7 @@ const parseDate = (dateString: string | null): Date | null => {
 const formatPrice = (value: number): string =>
     `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate }: ScatterChartComponentProps) => {
+export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate, imageLoader }: ScatterChartComponentProps) => {
     const scatterData = useMemo(() => {
         return data
             .filter(car => car.date_listed && car.price !== null && car.mileage !== null)
@@ -52,6 +39,16 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
             }))
             .sort((a, b) => a.x - b.x);
     }, [data]);
+
+    // Preload images
+    useEffect(() => {
+        scatterData.forEach(car => {
+            if (car.image) {
+                const img = new Image();
+                img.src = car.image;
+            }
+        });
+    }, [scatterData]);
 
     // Check if the data is suitable for graphing
     const isDataSuitable = scatterData.length > 1;
@@ -68,6 +65,15 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
             const data = payload[0].payload;
             return (
                 <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+                    {data.image && (
+                        <img
+                            src={imageLoader(data.image)}
+                            alt={`${data.year} ${data.make} ${data.model}`}
+                            className="w-full object-cover mb-2 rounded"
+                            style={{ height: '200px' }} // Set a fixed height of 200 pixels
+                            loading="lazy"
+                        />
+                    )}
                     <p className="label text-gray-700 font-bold mb-2">{`${data.year} ${data.make} ${data.model}`}</p>
                     <p className="value text-gray-900">{`Price: ${formatPrice(data.y)}`}</p>
                     <p className="date text-gray-600">{`Listed: ${new Date(data.x).toLocaleDateString()}`}</p>
