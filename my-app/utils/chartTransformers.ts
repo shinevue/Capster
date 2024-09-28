@@ -54,3 +54,41 @@ export const calculateKPIs = (data: CarData[]): KPIData => {
         averagePrice,
     };
 };
+
+export function calculatePreviousPeriodChange(currentKPIs: KPIData, previousKPIs: KPIData): number {
+    const currentAvgPrice = currentKPIs.averagePrice;
+    const previousAvgPrice = previousKPIs.averagePrice;
+    
+    if (previousAvgPrice === 0) return 0;
+    
+    return ((currentAvgPrice - previousAvgPrice) / previousAvgPrice) * 100;
+}
+
+export interface KPIComparison {
+  current: KPIData;
+  previous: KPIData;
+  changes: {
+    percentageChange: number;
+    totalListings: number;
+    averageDaysOnMarket: number;
+    averagePrice: number;
+  };
+}
+
+export function calculateKPIComparison(currentKPIs: KPIData, previousKPIs: KPIData): KPIComparison {
+  const calculatePercentageChange = (current: number, previous: number) => {
+    if (previous === 0) return 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  return {
+    current: currentKPIs,
+    previous: previousKPIs,
+    changes: {
+      percentageChange: currentKPIs.percentageChange - previousKPIs.percentageChange,
+      totalListings: calculatePercentageChange(currentKPIs.totalListings, previousKPIs.totalListings),
+      averageDaysOnMarket: calculatePercentageChange(currentKPIs.averageDaysOnMarket, previousKPIs.averageDaysOnMarket),
+      averagePrice: calculatePercentageChange(currentKPIs.averagePrice, previousKPIs.averagePrice),
+    },
+  };
+}

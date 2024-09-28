@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import { Switch } from '@headlessui/react';
 import { CarData, Filters, KPIData } from '@/types/CarData';
 import { initialFilters, updateFilter, removeFilter, getActiveFilters, applyFiltersToData } from '@/utils/filterModule';
-import { calculateKPIs } from '@/utils/chartTransformers';
+import { calculateKPIs, calculateKPIComparison, KPIComparison } from '@/utils/chartTransformers';
 import { preloadImages } from '@/utils/imageLoader';
 import { Theme } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
@@ -24,12 +24,7 @@ import { DateRangePicker } from "@/components/ui/test/date-range-picker";
 
 export default function Home() {
     const [filters, setFilters] = useState<Filters>(initialFilters);
-    const [kpiData, setKpiData] = useState<KPIData>({
-        percentageChange: 0,
-        totalListings: 0,
-        averageDaysOnMarket: 0,
-        averagePrice: 0,
-    });
+    const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(null);
     const [showLineChart, setShowLineChart] = useState(true);
     const [showScatterChart, setShowScatterChart] = useState(true);
     const [showDataTable, setShowDataTable] = useState(true);
@@ -69,10 +64,6 @@ export default function Home() {
         }
     };
 
-    const handleRemoveFilter = (key: keyof Filters) => {
-        setFilters(prev => removeFilter(prev, key));
-    };
-
     const activeFilters = getActiveFilters(filters);
 
     useEffect(() => {
@@ -90,7 +81,19 @@ export default function Home() {
 
     useEffect(() => {
         const filteredData = applyFiltersToData(lineChartData as CarData[], filters);
-        setKpiData(calculateKPIs(filteredData));
+        const currentKPIs = calculateKPIs(filteredData);
+
+        if (filters.startDate && filters.endDate) {
+            const previousPeriodStart = new Date(filters.startDate.getTime() - (filters.endDate.getTime() - filters.startDate.getTime()));
+            const previousPeriodEnd = new Date(filters.startDate);
+            const previousPeriodData = applyFiltersToData(lineChartData as CarData[], { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
+            const previousKPIs = calculateKPIs(previousPeriodData);
+
+            const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
+            setKpiComparison(comparison);
+        } else {
+            setKpiComparison(null);
+        }
 
         // Preload images for the filtered data
         preloadImages(filteredData).then(setPreloadedImages);
@@ -127,6 +130,9 @@ export default function Home() {
     // Create a memoized image loader function
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
+    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
+    const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'onlyWithPricing'];
+
     return (
         <Theme>
             <motion.div
@@ -146,12 +152,22 @@ export default function Home() {
                             Porsche 911 GT3 Sales
                         </h1>
 
-                        <KPICards {...kpiData} />
-
+                        {/* Top FilterGrid for make, model, variant, trim */}
                         <FilterGrid
                             data={lineChartData as CarData[]}
                             currentFilters={filters}
                             onApplyFilters={handleApplyFilters}
+                            includedFilters={topFilters}
+                        />
+
+                        {kpiComparison && <KPICards kpiComparison={kpiComparison} />}
+
+                        {/* Other FilterGrid for remaining filters */}
+                        <FilterGrid
+                            data={lineChartData as CarData[]}
+                            currentFilters={filters}
+                            onApplyFilters={handleApplyFilters}
+                            includedFilters={otherFilters}
                         />
 
                         <div className="mb-8 flex justify-end">

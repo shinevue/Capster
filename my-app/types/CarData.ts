@@ -19,6 +19,8 @@ export interface CarData {
 }
 
 export interface Filters {
+    make: string | null;
+    model: string | null;
     trim: string | null;
     mileage: number | null;
     exteriorColor: string | null;

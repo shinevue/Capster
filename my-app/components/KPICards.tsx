@@ -2,41 +2,55 @@ import { FC } from 'react';
 import { Card, Flex, Text, Box } from '@radix-ui/themes';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { ArrowUpIcon, ArrowDownIcon } from '@radix-ui/react-icons';
+import { KPIComparison } from '@/utils/chartTransformers';
 
 interface KPICardsProps {
-    percentageChange: number;
-    totalListings: number;
-    averageDaysOnMarket: number;
-    averagePrice: number;
+    kpiComparison: KPIComparison;
 }
 
-const KPICards: FC<KPICardsProps> = ({ percentageChange, totalListings, averageDaysOnMarket, averagePrice }) => {
+const KPICards: FC<KPICardsProps> = ({ kpiComparison }) => {
+    const { current, changes } = kpiComparison;
+
+    const formatChange = (change: number, isInverse: boolean = false) => {
+        const prefix = isInverse ? (change >= 0 ? '-' : '+') : (change >= 0 ? '+' : '-');
+        return `${prefix}${Math.abs(change).toFixed(2)}%`;
+    };
+
+    const getChangeText = (change: number, isInverse: boolean = false) => {
+        const direction = isInverse ? (change >= 0 ? 'decrease' : 'increase') : (change >= 0 ? 'increase' : 'decrease');
+        return `${formatChange(change, isInverse)} ${direction} from last period`;
+    };
+
     return (
-        <Flex direction="row" gap="3" wrap="wrap" className="mb-6">
+        <Flex direction="row" gap="5" wrap="wrap" className="mb-6">
             <KPICard
                 title="% Change"
-                value={`${Math.abs(percentageChange).toFixed(2)}%`}
+                value={`${Math.abs(current.percentageChange).toFixed(2)}%`}
                 icon={
-                    percentageChange >= 0
+                    current.percentageChange >= 0
                         ? <ArrowUpIcon className="text-green-600" />
                         : <ArrowDownIcon className="text-red-600" />
                 }
-                valueColor={percentageChange >= 0 ? "green" : "red"}
+                valueColor={current.percentageChange >= 0 ? "green" : "red"}
+                changeText={getChangeText(changes.percentageChange)}
             />
             <KPICard
                 title="Total Listings"
-                value={formatNumber(totalListings)}
+                value={formatNumber(current.totalListings)}
                 valueColor="blue"
+                changeText={getChangeText(changes.totalListings)}
             />
             <KPICard
                 title="Avg Days on Market"
-                value={averageDaysOnMarket.toFixed(1)}
+                value={current.averageDaysOnMarket.toFixed(1)}
                 valueColor="purple"
+                changeText={getChangeText(changes.averageDaysOnMarket, true)}
             />
             <KPICard
                 title="Average Price"
-                value={formatCurrency(averagePrice)}
+                value={formatCurrency(current.averagePrice)}
                 valueColor="yellow"
+                changeText={getChangeText(changes.averagePrice)}
             />
         </Flex>
     );
@@ -47,18 +61,24 @@ interface KPICardProps {
     value: string;
     icon?: React.ReactNode;
     valueColor?: string;
+    changeText: string;
 }
 
-const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor }) => (
-    <Card className="flex-1 min-w-[200px] sm:min-w-[150px]">
+const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText }) => (
+    <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md">
         <Flex direction="column" gap="1">
             <Text size="2" weight="bold" color="gray">
                 {title}
             </Text>
             <Flex justify="between" align="center">
-                <Text size="6" weight="bold" color={valueColor as any}>
-                    {value}
-                </Text>
+                <Flex direction="column">
+                    <Text size="6" weight="bold" color={valueColor as any}>
+                        {value}
+                    </Text>
+                    <Text size="2" color="gray">
+                        {changeText}
+                    </Text>
+                </Flex>
                 {icon && (
                     <Box>
                         {icon}
