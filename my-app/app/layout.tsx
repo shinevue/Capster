@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import '@radix-ui/themes/styles.css';
-import { Theme } from '@radix-ui/themes';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -16,9 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Theme>
+        <ThemeProvider>
           {children}
-        </Theme>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -90,8 +90,10 @@ export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, sta
         };
     }, [data]);
 
-    // Check if the data is suitable for graphing
-    const isDataSuitable = chartData.length > 1 && chartData.some(entry => entry.averagePrice !== null);
+    const isDataSuitable = useMemo(() => {
+        const validDataPoints = chartData.filter(entry => entry.averagePrice !== null);
+        return validDataPoints.length > 0;
+    }, [chartData]);
 
     const formatXAxis = (dateString: string) => {
         const date = new Date(dateString);
