@@ -19,8 +19,6 @@ import { Theme } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
 import { addDays } from "date-fns";
 import { DateRange } from "react-day-picker";
-// import { DateRangePicker } from "@/components/DateRangePicker";
-import { DateRangePicker } from "@/components/ui/test/date-range-picker";
 
 export default function Home() {
     const [filters, setFilters] = useState<Filters>(initialFilters);
@@ -29,39 +27,43 @@ export default function Home() {
     const [showScatterChart, setShowScatterChart] = useState(true);
     const [showDataTable, setShowDataTable] = useState(true);
     const [preloadedImages, setPreloadedImages] = useState<{ [key: string]: string; }>({});
-    const [dateRange, setDateRange] = useState<{ range: DateRange; }>({
-        range: {
-            from: addDays(new Date(), -7),
-            to: new Date(),
-        }
-    });
 
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        // Initialize filters from URL params or use dateRange
+        // Initialize filters from URL params
         const urlFilters = Object.fromEntries(searchParams.entries());
         setFilters(prevFilters => ({
             ...prevFilters,
             ...urlFilters,
-            startDate: urlFilters.startDate ? new Date(urlFilters.startDate) : dateRange.range.from,
-            endDate: urlFilters.endDate ? new Date(urlFilters.endDate) : dateRange.range.to,
-            onlyWithPricing: urlFilters.onlyWithPricing === 'true',
+            startDate: urlFilters.startDate ? new Date(urlFilters.startDate) : null,
+            endDate: urlFilters.endDate ? new Date(urlFilters.endDate) : null,
         }));
-    }, [searchParams, dateRange]);
+    }, [searchParams]);
 
-    const handleDateRangeChange = (values: { range: DateRange; rangeCompare?: DateRange; }) => {
-        setDateRange(values);
+    const handleTimeFilterChange = (newPeriod: 'day' | 'week' | 'month', newPeriodCount: number) => {
+        const endDate = new Date();
+        const startDate = new Date();
 
-        if (values.range.from && values.range.to) {
-            setFilters(prev => ({
-                ...prev,
-                startDate: values.range.from,
-                endDate: values.range.to,
-                period: 'custom',
-                periodCount: 0,
-            }));
+        switch (newPeriod) {
+            case 'day':
+                startDate.setDate(endDate.getDate() - newPeriodCount);
+                break;
+            case 'week':
+                startDate.setDate(endDate.getDate() - newPeriodCount * 7);
+                break;
+            case 'month':
+                startDate.setMonth(endDate.getMonth() - newPeriodCount);
+                break;
         }
+
+        setFilters(prev => ({
+            ...prev,
+            period: newPeriod,
+            periodCount: newPeriodCount,
+            startDate,
+            endDate,
+        }));
     };
 
     const activeFilters = getActiveFilters(filters);
@@ -69,7 +71,7 @@ export default function Home() {
     useEffect(() => {
         if (!filters.startDate || !filters.endDate) {
             if (filters.period !== 'custom') {
-                handleDateRangeChange(dateRange);
+                handleTimeFilterChange(filters.period, filters.periodCount);
             }
         }
     }, []);
@@ -171,11 +173,27 @@ export default function Home() {
                         />
 
                         <div className="mb-8 flex justify-end">
-                            <DateRangePicker
-                                initialDateFrom={dateRange.range.from}
-                                initialDateTo={dateRange.range.to}
-                                onUpdate={handleDateRangeChange}
-                            />
+                            <motion.div whileHover={{ scale: 1.05 }} className="relative">
+                                <select
+                                    className="appearance-none bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-md"
+                                    value={`${filters.period}-${filters.periodCount}`}
+                                    onChange={(e) => {
+                                        const [period, count] = e.target.value.split('-');
+                                        handleTimeFilterChange(period as 'day' | 'week' | 'month', parseInt(count));
+                                    }}
+                                >
+                                    <option value="day-7">Last week</option>
+                                    <option value="day-30">Last 30 days</option>
+                                    <option value="month-3">Last 3 months</option>
+                                    <option value="month-6">Last 6 months</option>
+                                    <option value="month-12">Last 12 months</option>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                    </svg>
+                                </div>
+                            </motion.div>
                         </div>
 
                         <div className="mb-8 flex flex-wrap gap-4">
@@ -240,7 +258,7 @@ export default function Home() {
                                     <LineChartComponent
                                         data={filteredData}
                                         onTimeSelection={(startDate, endDate) => {
-                                            handleDateRangeChange({ range: { from: startDate, to: endDate } });
+                                            handleTimeFilterChange('custom', 0);
                                         }}
                                         onDataSelection={() => { }}
                                         startDate={filters.startDate}
@@ -258,7 +276,7 @@ export default function Home() {
                                     <ScatterChartComponent
                                         data={filteredData}
                                         onTimeSelection={(startDate, endDate) => {
-                                            handleDateRangeChange({ range: { from: startDate, to: endDate } });
+                                            handleTimeFilterChange('custom', 0);
                                         }}
                                         onDataSelection={() => { }}
                                         startDate={filters.startDate}
