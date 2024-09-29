@@ -115,7 +115,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: isMobile ? getPaginationRowModel() : undefined,
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters,
@@ -128,10 +128,8 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
         trackMouse: true
     });
 
-    const swipeableProps = isMobile ? handlers : {};
-
     return (
-        <div className="overflow-x-auto" {...swipeableProps}>
+        <div className="overflow-x-auto" {...handlers}>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -174,27 +172,25 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                     </TableBody>
                 </Table>
             </div>
-            {isMobile && (
-                <div className="flex justify-between items-center mt-4">
-                    <Button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                        Previous
-                    </Button>
-                    <span className="text-sm text-gray-700">
-                        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                    </span>
-                    <Button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Next
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                </div>
-            )}
+            <div className="flex justify-between items-center mt-4">
+                <Button
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                </Button>
+                <span className="text-sm text-gray-700">
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                </span>
+                <Button
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
     );
 };
