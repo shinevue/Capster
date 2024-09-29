@@ -9,11 +9,13 @@ import defaultData from "@/data/data.json";
 import DataTable from "@/components/DataTable";
 import KPICards from "@/components/KPICards";
 import { motion } from 'framer-motion';
-import { Switch } from '@headlessui/react';
 import { CarData, Filters } from '@/types/CarData';
 import { initialFilters, applyFiltersToData } from '@/utils/filterModule';
 import { calculateKPIs, calculateKPIComparison, KPIComparison } from '@/utils/chartTransformers';
 import { preloadImages } from '@/utils/imageLoader';
+import { useMediaQuery } from 'react-responsive';
+import { FaChartLine, FaChartBar, FaTable } from 'react-icons/fa'; // Updated import
+import { ChartToggleButton } from '@/components/ui/chartToggleButton';
 
 export default function Home() {
     const [filters, setFilters] = useState<Filters>(initialFilters);
@@ -111,6 +113,8 @@ export default function Home() {
     const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
     const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'onlyWithPricing'];
 
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -118,12 +122,12 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="min-h-screen w-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden"
         >
-            <main className="flex-grow flex flex-col p-4 md:p-8 overflow-hidden">
+            <main className="flex-grow flex flex-col md:p-8 overflow-hidden">
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    className="bg-white rounded-2xl shadow-2xl p-6 md:p-10 w-full h-full border border-gray-200 flex flex-col overflow-hidden"
+                    className="bg-white rounded-2xl shadow-2xl p-2 md:p-10 w-full h-full border border-gray-200 flex flex-col overflow-hidden"
                 >
                     <h1 className="text-4xl md:text-6xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700">
                         Porsche 911 GT3 Sales
@@ -171,55 +175,29 @@ export default function Home() {
                         </motion.div>
                     </div>
 
-                    <div className="mb-8 flex flex-wrap gap-4">
-                        <Switch.Group>
-                            <div className="flex items-center">
-                                <Switch.Label className="mr-4">Line Chart</Switch.Label>
-                                <Switch
-                                    checked={showLineChart}
-                                    onChange={setShowLineChart}
-                                    className={`${showLineChart ? 'bg-blue-600' : 'bg-gray-200'
-                                        } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                                >
-                                    <span
-                                        className={`${showLineChart ? 'translate-x-6' : 'translate-x-1'
-                                            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </Switch>
-                            </div>
-                        </Switch.Group>
-                        <Switch.Group>
-                            <div className="flex items-center">
-                                <Switch.Label className="mr-4">Scatter Chart</Switch.Label>
-                                <Switch
-                                    checked={showScatterChart}
-                                    onChange={setShowScatterChart}
-                                    className={`${showScatterChart ? 'bg-blue-600' : 'bg-gray-200'
-                                        } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                                >
-                                    <span
-                                        className={`${showScatterChart ? 'translate-x-6' : 'translate-x-1'
-                                            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </Switch>
-                            </div>
-                        </Switch.Group>
-                        <Switch.Group>
-                            <div className="flex items-center">
-                                <Switch.Label className="mr-4">Data Table</Switch.Label>
-                                <Switch
-                                    checked={showDataTable}
-                                    onChange={setShowDataTable}
-                                    className={`${showDataTable ? 'bg-blue-600' : 'bg-gray-200'
-                                        } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                                >
-                                    <span
-                                        className={`${showDataTable ? 'translate-x-6' : 'translate-x-1'
-                                            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </Switch>
-                            </div>
-                        </Switch.Group>
+                    {/* Replace the Switch components with these new buttons */}
+                    <div className="mb-8 flex flex-wrap gap-4 justify-center">
+                        <ChartToggleButton
+                            icon={<FaChartLine />}
+                            label="Line Chart"
+                            isActive={showLineChart}
+                            onClick={() => setShowLineChart(!showLineChart)}
+                            color="bg-blue-500" // Added color prop
+                        />
+                        <ChartToggleButton
+                            icon={<FaChartBar />}
+                            label="Scatter Chart"
+                            isActive={showScatterChart}
+                            onClick={() => setShowScatterChart(!showScatterChart)}
+                            color="bg-blue-500" // Added color prop
+                        />
+                        <ChartToggleButton
+                            icon={<FaTable />}
+                            label="Data Table"
+                            isActive={showDataTable}
+                            onClick={() => setShowDataTable(!showDataTable)}
+                            color="bg-blue-500" // Added color prop
+                        />
                     </div>
 
                     <div className="flex flex-col space-y-8 overflow-hidden">
@@ -228,19 +206,11 @@ export default function Home() {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4, duration: 0.5 }}
-                                className="bg-white rounded-xl p-6 shadow-lg"
+                                className={`bg-white rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
                             >
                                 <LineChartComponent
                                     data={filteredData}
-                                    onTimeSelection={(startDate, endDate) => {
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            period: 'custom',
-                                            periodCount: 0,
-                                            startDate,
-                                            endDate,
-                                        }));
-                                    }}
+                                    onTimeSelection={() => { }}
                                     onDataSelection={() => { }}
                                     startDate={filters.startDate}
                                     endDate={filters.endDate}
@@ -252,19 +222,11 @@ export default function Home() {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4, duration: 0.5 }}
-                                className="bg-white rounded-xl p-6 shadow-lg"
+                                className={`bg-white rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
                             >
                                 <ScatterChartComponent
                                     data={filteredData}
-                                    onTimeSelection={(startDate, endDate) => {
-                                        setFilters(prev => ({
-                                            ...prev,
-                                            period: 'custom',
-                                            periodCount: 0,
-                                            startDate,
-                                            endDate,
-                                        }));
-                                    }}
+                                    onTimeSelection={() => { }}
                                     onDataSelection={() => { }}
                                     startDate={filters.startDate}
                                     endDate={filters.endDate}
@@ -277,7 +239,7 @@ export default function Home() {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.8, duration: 0.5 }}
-                                className="bg-white rounded-xl p-6 shadow-lg flex-grow overflow-auto"
+                                className="bg-white rounded-xl md:p-6 shadow-lg flex-grow overflow-auto"
                             >
                                 <DataTable
                                     data={filteredData}

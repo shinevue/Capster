@@ -55,7 +55,8 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
     };
 
     return (
-        <div className="flex flex-wrap gap-6 mb-8">
+        // break if more than 4 filters
+        <div className="flex gap-6 mb-8 flex-wrap">
             {Object.entries(filterConfig).map(([key, config]) => {
                 if (!includedFilters.includes(key as keyof Filters)) return null;
 
@@ -74,7 +75,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                 }
 
                 return (
-                    <div key={key} className="flex-grow basis-40 max-w-xs space-y-2">
+                    <div key={key} className="flex-grow max-w-xs space-y-2">
                         {/* <Text as="label" size="2" weight="bold" className="block mb-1 text-gray-700">
                             {config.label}
                         </Text> */}
@@ -82,7 +83,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                             value={(currentFilters[key as keyof Filters] as string) || 'all'}
                             onValueChange={(value) => handleFilterChange(key as keyof Filters, value)}
                         >
-                            <Select.Trigger className="w-full !px-14" />
+                            <Select.Trigger className="!w-[250px]" />
                             <Select.Content>
                                 <Select.Item value="all">All {config.label}s</Select.Item>
                                 {config.options.map((option) => (

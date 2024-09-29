@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { CarData } from '@/types/CarData';
 import {
@@ -12,8 +12,8 @@ import {
     SortingState,
     getFilteredRowModel,
     ColumnFiltersState,
+    getPaginationRowModel,
 } from "@tanstack/react-table";
-
 import {
     Table,
     TableBody,
@@ -22,9 +22,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useMediaQuery } from 'react-responsive';
+import { useSwipeable } from 'react-swipeable';
 
 interface DataTableProps {
     data: CarData[];
@@ -36,8 +37,11 @@ interface DataTableProps {
 const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, imageLoader }) => {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const isMobile = useMediaQuery({ maxWidth: 767 });
 
-    const tableColumns: ColumnDef<CarData>[] = columns.map(column => {
+    const mobileColumns: (keyof CarData)[] = ['image', 'make', 'model', 'year', 'price'];
+
+    const tableColumns: ColumnDef<CarData>[] = (isMobile ? mobileColumns : columns).map(column => {
         if (column === 'image') {
             return {
                 accessorKey: "image",
@@ -45,22 +49,25 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                 cell: ({ row }) => {
                     const image = row.original.image;
                     return (
-                        <div className="w-[250px] h-[200px] rounded flex items-center justify-center">
+                        <div className={`${isMobile ? 'w-[100px] h-[80px]' : 'w-[250px] h-[200px]'} rounded flex items-center justify-center`}>
                             {image ? (
                                 <Image
                                     src={imageLoader(image)}
                                     alt={`${row.original.make} ${row.original.model}`}
-                                    width={250}
-                                    height={200}
-                                    className="rounded"
+                                    width={isMobile ? 100 : 250}
+                                    height={isMobile ? 80 : 200}
+                                    className="rounded object-cover"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
-                                        e.currentTarget.nextSibling.style.display = 'block';
+                                        const nextSibling = e.currentTarget.nextSibling as HTMLElement;
+                                        if (nextSibling) {
+                                            nextSibling.style.display = 'block';
+                                        }
                                     }}
                                 />
                             ) : null}
                             <div className="text-gray-500" style={{ display: image ? 'none' : 'block' }}>
-                                <span className="text-lg">No image found</span>
+                                <span className={isMobile ? "text-sm" : "text-lg"}>No image</span>
                             </div>
                         </div>
                     );
@@ -76,9 +83,10 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                     <Button
                         variant="ghost"
                         onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
+                        className={isMobile ? "p-1 text-xs" : ""}
                     >
                         {title}
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        <ArrowUpDown className={isMobile ? "ml-1 h-3 w-3" : "ml-2 h-4 w-4"} />
                     </Button>
                 ) : (
                     title
@@ -107,22 +115,28 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters,
         },
     });
 
+    const handlers = useSwipeable({
+        onSwipedLeft: () => table.nextPage(),
+        onSwipedRight: () => table.previousPage(),
+        trackMouse: true
+    });
+
     return (
-        <div>
+        <div className="overflow-x-auto" {...handlers}>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow
-                                key={headerGroup.id}>
+                            <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
+                                    <TableHead key={header.id} className={isMobile ? "text-xs" : "p-2"}>
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -142,8 +156,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell
-                                            key={cell.id}>
+                                        <TableCell key={cell.id} className={isMobile ? "p-2 text-xs" : ""}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -159,6 +172,27 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                     </TableBody>
                 </Table>
             </div>
+            {isMobile && (
+                <div className="flex justify-between items-center mt-4">
+                    <Button
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                    </Button>
+                    <span className="text-sm text-gray-700">
+                        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                    </span>
+                    <Button
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };
