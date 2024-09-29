@@ -1,23 +1,13 @@
 "use client";
 
+import React from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useMemo, useState } from "react";
-import { Switch } from '@headlessui/react';
-
-interface CarData {
-    source: string;
-    date_listed: string | null;
-    year: string;
-    make: string;
-    model: string;
-    trim: string | null;
-    price: number | null;
-    mileage: number | null;
-    interior_color: string | null;
-    exterior_color: string | null;
-    transmission: string | null;
-    drivetrain: string | null;
-}
+import { CarData } from '@/types/CarData';
+import { useMediaQuery } from 'react-responsive'; // Add this import
+import { motion } from 'framer-motion';
+import { ChartToggleButton } from '@/components/ui/chartToggleButton';
+import { FaChartLine } from 'react-icons/fa'; // Updated import
 
 interface LineChartComponentProps {
     data: CarData[];
@@ -42,14 +32,26 @@ const parseDate = (dateString: string | null): Date | null => {
 };
 
 const formatPrice = (value: number | null | undefined): string =>
-    value == null ? 'N/A' : `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    value == null ? 'N/A' : `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate }: LineChartComponentProps) => {
+const ToggleButton: React.FC<{ label: string; isActive: boolean; onClick: () => void; color: string; }> = ({ label, isActive, onClick, color }) => (
+    <motion.button
+        onClick={onClick}
+        className={`px-3 py-2 rounded-full text-sm font-medium transition-colors ${isActive ? `bg-${color}-500 text-white` : 'bg-gray-200 text-gray-700'
+            }`}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+    >
+        {label}
+    </motion.button>
+);
+
+export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, onDataSelection, onTimeSelection, startDate, endDate }) => {
     const [showMainLine, setShowMainLine] = useState(true);
     const [show7DayMA, setShow7DayMA] = useState(false);
     const [show30DayMA, setShow30DayMA] = useState(false);
 
-    const { chartData, entriesInTimeRange, totalEntries } = useMemo(() => {
+    const { chartData } = useMemo(() => {
         const counts: Record<string, { count: number; totalPrice: number; minPrice: number; maxPrice: number; listings: CarData[]; }> = {};
 
         data.forEach(car => {
@@ -104,8 +106,10 @@ export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, sta
         };
     }, [data]);
 
-    // Check if the data is suitable for graphing
-    const isDataSuitable = chartData.length > 1 && chartData.some(entry => entry.averagePrice !== null);
+    const isDataSuitable = useMemo(() => {
+        const validDataPoints = chartData.filter(entry => entry.averagePrice !== null);
+        return validDataPoints.length > 0;
+    }, [chartData]);
 
     const formatXAxis = (dateString: string) => {
         const date = new Date(dateString);
@@ -117,6 +121,26 @@ export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, sta
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+            const isMobile = useMediaQuery({ maxWidth: 767 });
+
+            if (isMobile) {
+                return (
+                    <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs">
+                        <p className="label font-bold">{formatXAxis(label)}</p>
+                        {showMainLine && (
+                            <p>{`Avg: ${formatPrice(data.averagePrice)}`}</p>
+                        )}
+                        <p>{`Count: ${data.count}`}</p>
+                        {show7DayMA && data.ma7 !== null && (
+                            <p>{`7D MA: ${formatPrice(data.ma7)}`}</p>
+                        )}
+                        {show30DayMA && data.ma30 !== null && (
+                            <p>{`30D MA: ${formatPrice(data.ma30)}`}</p>
+                        )}
+                    </div>
+                );
+            }
+
             return (
                 <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
                     <p className="label text-gray-700 font-bold mb-2">{`Date: ${label}`}</p>
@@ -138,6 +162,8 @@ export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, sta
         return null;
     };
 
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+
     if (!isDataSuitable) {
         return (
             <div className="flex items-center justify-center h-[200px] bg-gray-100 rounded-lg">
@@ -149,108 +175,96 @@ export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, sta
     }
 
     return (
-        <div className="relative">
-            <div className="absolute top-0 right-0 bg-white bg-opacity-75 p-2 rounded text-lg text-black">
-                {entriesInTimeRange} / {totalEntries} entries
+        <div className="relative w-full">
+            <div className="mb-4 flex flex-wrap gap-2">
+                <ChartToggleButton
+                    icon={<FaChartLine />}
+                    label="Main Line"
+                    isActive={showMainLine}
+                    onClick={() => setShowMainLine(!showMainLine)}
+                    color="bg-blue-500" // Matches the main line color
+                />
+                <ChartToggleButton
+                    icon={<FaChartLine />}
+                    label="7-Day MA"
+                    isActive={show7DayMA}
+                    onClick={() => setShow7DayMA(!show7DayMA)}
+                    color="bg-green-500" // Matches the 7-day MA line color
+                />
+                <ChartToggleButton
+                    icon={<FaChartLine />}
+                    label="30-Day MA"
+                    isActive={show30DayMA}
+                    onClick={() => setShow30DayMA(!show30DayMA)}
+                    color="bg-yellow-500" // Matches the 30-day MA line color
+                />
             </div>
-            <div className="mb-4 flex space-x-4">
-                <Switch.Group>
-                    <div className="flex items-center">
-                        <Switch.Label className="mr-2">Main Line</Switch.Label>
-                        <Switch
-                            checked={showMainLine}
-                            onChange={setShowMainLine}
-                            className={`${showMainLine ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                        >
-                            <span className={`${showMainLine ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
-                        </Switch>
-                    </div>
-                </Switch.Group>
-                <Switch.Group>
-                    <div className="flex items-center">
-                        <Switch.Label className="mr-2">7-Day MA</Switch.Label>
-                        <Switch
-                            checked={show7DayMA}
-                            onChange={setShow7DayMA}
-                            className={`${show7DayMA ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                        >
-                            <span className={`${show7DayMA ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
-                        </Switch>
-                    </div>
-                </Switch.Group>
-                <Switch.Group>
-                    <div className="flex items-center">
-                        <Switch.Label className="mr-2">30-Day MA</Switch.Label>
-                        <Switch
-                            checked={show30DayMA}
-                            onChange={setShow30DayMA}
-                            className={`${show30DayMA ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                        >
-                            <span className={`${show30DayMA ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
-                        </Switch>
-                    </div>
-                </Switch.Group>
+            <div className="w-full h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={isMobile ? { top: 20, right: 10, left: 0, bottom: 20 } : { top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
+                        <XAxis
+                            dataKey="date"
+                            stroke="#555555"
+                            fontSize={isMobile ? 10 : 14}
+                            tickLine={false}
+                            axisLine={false}
+                            padding={{ left: isMobile ? 0 : 30, right: isMobile ? 0 : 30 }}
+                            tickFormatter={formatXAxis}
+                            interval="preserveStartEnd"
+                            minTickGap={isMobile ? 30 : 50}
+                        />
+                        <YAxis
+                            stroke="#555555"
+                            fontSize={isMobile ? 10 : 14}
+                            tickLine={false}
+                            axisLine={false}
+                            label={{ value: `${isMobile ? "" : "Average Price"}`, angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
+                            padding={{ top: 20, bottom: 20 }}
+                            tickFormatter={formatYAxis}
+                            tick={{
+                                textAnchor: 'end',
+                                angle: -45,
+                                dx: -10,
+                            } as any}
+                            width={isMobile ? 50 : 100}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        {showMainLine && (
+                            <Line
+                                type="monotone"
+                                dataKey="averagePrice"
+                                stroke="#3b82f6"
+                                strokeWidth={3}
+                                dot={{ r: 5, strokeWidth: 2 }}
+                                activeDot={{ r: 9, strokeWidth: 0 }}
+                                name="Average Price"
+                            />
+                        )}
+                        {show7DayMA && (
+                            <Line
+                                type="monotone"
+                                dataKey="ma7"
+                                stroke="#10b981"
+                                strokeWidth={2}
+                                dot={false}
+                                name="7-Day MA"
+                            />
+                        )}
+                        {show30DayMA && (
+                            <Line
+                                type="monotone"
+                                dataKey="ma30"
+                                stroke="#f59e0b"
+                                strokeWidth={2}
+                                dot={false}
+                                name="30-Day MA"
+                            />
+                        )}
+                    </LineChart>
+                </ResponsiveContainer>
             </div>
-            <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
-                    <XAxis
-                        dataKey="date"
-                        stroke="#555555"
-                        fontSize={14}
-                        tickLine={false}
-                        axisLine={false}
-                        padding={{ left: 30, right: 30 }}
-                        tickFormatter={formatXAxis}
-                        interval="preserveStartEnd"
-                        minTickGap={50}
-                    />
-                    <YAxis
-                        stroke="#555555"
-                        fontSize={14}
-                        tickLine={false}
-                        axisLine={false}
-                        label={{ value: 'Average Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
-                        padding={{ top: 20, bottom: 20 }}
-                        tickFormatter={formatYAxis}
-                        tick={{ textAnchor: 'end' }}
-                        width={100}
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend />
-                    {showMainLine && (
-                        <Line
-                            type="monotone"
-                            dataKey="averagePrice"
-                            stroke="#3b82f6"
-                            strokeWidth={3}
-                            dot={{ r: 5, strokeWidth: 2 }}
-                            activeDot={{ r: 9, strokeWidth: 0 }}
-                            name="Average Price"
-                        />
-                    )}
-                    {show7DayMA && (
-                        <Line
-                            type="monotone"
-                            dataKey="ma7"
-                            stroke="#10b981"
-                            strokeWidth={2}
-                            dot={false}
-                            name="7-Day MA"
-                        />
-                    )}
-                    {show30DayMA && (
-                        <Line
-                            type="monotone"
-                            dataKey="ma30"
-                            stroke="#f59e0b"
-                            strokeWidth={2}
-                            dot={false}
-                            name="30-Day MA"
-                        />
-                    )}
-                </LineChart>
-            </ResponsiveContainer>
         </div>
     );
 };

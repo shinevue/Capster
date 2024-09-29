@@ -1,22 +1,9 @@
 "use client";
 
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { useMemo } from 'react';
-
-interface CarData {
-    source: string;
-    date_listed: string | null;
-    year: string;
-    make: string;
-    model: string;
-    trim: string | null;
-    price: number | null;
-    mileage: number | null;
-    interior_color: string | null;
-    exterior_color: string | null;
-    transmission: string | null;
-    drivetrain: string | null;
-}
+import { useMemo, useEffect } from 'react';
+import { CarData } from '@/types/CarData';
+import { useMediaQuery } from 'react-responsive';
 
 interface ScatterChartComponentProps {
     data: CarData[];
@@ -24,6 +11,7 @@ interface ScatterChartComponentProps {
     onTimeSelection: (startDate: Date, endDate: Date) => void;
     startDate: Date | null;
     endDate: Date | null;
+    imageLoader: (src: string) => string;
 }
 
 const parseDate = (dateString: string | null): Date | null => {
@@ -38,9 +26,11 @@ const parseDate = (dateString: string | null): Date | null => {
 };
 
 const formatPrice = (value: number): string =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    value == null ? 'N/A' : `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate }: ScatterChartComponentProps) => {
+export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate, imageLoader }: ScatterChartComponentProps) => {
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+
     const scatterData = useMemo(() => {
         return data
             .filter(car => car.date_listed && car.price !== null && car.mileage !== null)
@@ -52,6 +42,16 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
             }))
             .sort((a, b) => a.x - b.x);
     }, [data]);
+
+    // Preload images
+    useEffect(() => {
+        scatterData.forEach(car => {
+            if (car.image) {
+                const img = new Image();
+                img.src = car.image;
+            }
+        });
+    }, [scatterData]);
 
     // Check if the data is suitable for graphing
     const isDataSuitable = scatterData.length > 1;
@@ -66,8 +66,27 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+            if (isMobile) {
+                return (
+                    <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs">
+                        <p className="label font-bold">{`${data.year} ${data.make} ${data.model}`}</p>
+                        <p>{`Price: ${formatPrice(data.y)}`}</p>
+                        <p>{`Listed: ${formatXAxis(data.x)}`}</p>
+                        <p>{`Mileage: ${data.z.toLocaleString()}`}</p>
+                    </div>
+                );
+            }
             return (
                 <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+                    {data.image && (
+                        <img
+                            src={imageLoader(data.image)}
+                            alt={`${data.year} ${data.make} ${data.model}`}
+                            className="w-full object-cover mb-2 rounded"
+                            style={{ height: '200px' }}
+                            loading="lazy"
+                        />
+                    )}
                     <p className="label text-gray-700 font-bold mb-2">{`${data.year} ${data.make} ${data.model}`}</p>
                     <p className="value text-gray-900">{`Price: ${formatPrice(data.y)}`}</p>
                     <p className="date text-gray-600">{`Listed: ${new Date(data.x).toLocaleDateString()}`}</p>
@@ -94,12 +113,9 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     }
 
     return (
-        <div className="relative">
-            <div className="absolute top-0 right-0 bg-gray-100 p-2 rounded text-lg text-gray-700">
-                {scatterData.length} entries
-            </div>
-            <ResponsiveContainer width="100%" height={400}>
-                <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+        <div className="relative w-full h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={isMobile ? { top: 20, right: 10, left: 0, bottom: 20 } : { top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
                     <XAxis
                         dataKey="x"
@@ -108,24 +124,28 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
                         type="number"
                         domain={['dataMin', 'dataMax']}
                         stroke="#555555"
-                        fontSize={14}
+                        fontSize={isMobile ? 10 : 14}
                         tickLine={false}
                         axisLine={false}
-                        padding={{ left: 30, right: 30 }}
+                        padding={{ left: isMobile ? 0 : 30, right: isMobile ? 0 : 30 }}
                         interval="preserveStartEnd"
-                        minTickGap={50}
+                        minTickGap={isMobile ? 30 : 50}
                     />
                     <YAxis
                         dataKey="y"
                         name="Price"
                         tickFormatter={formatYAxis}
                         stroke="#555555"
-                        fontSize={14}
+                        fontSize={isMobile ? 10 : 14}
                         tickLine={false}
                         axisLine={false}
-                        label={{ value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
-                        tick={{ textAnchor: 'end' }}
-                        width={100}
+                        label={isMobile ? null : { value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 } as any}
+                        tick={{
+                            textAnchor: 'end',
+                            angle: -45,
+                            dx: -10
+                        } as any}
+                        width={isMobile ? 50 : 100}
                     />
                     <ZAxis dataKey="z" range={[20, 60]} name="Mileage" />
                     <Tooltip content={<CustomTooltip />} />
@@ -135,7 +155,7 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
                                 key={`circle-${index}`}
                                 cx={0}
                                 cy={0}
-                                r={7}
+                                r={isMobile ? 5 : 7}
                                 fill="#3b82f6"
                                 fillOpacity={0.6}
                                 stroke="#3b82f6"

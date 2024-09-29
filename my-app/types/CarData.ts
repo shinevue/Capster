@@ -11,5 +11,33 @@ export interface CarData {
     exterior_color: string | null;
     transmission: string | null;
     drivetrain: string | null;
-    listing_type: string | null;
+    listingType: string | null;
+    photos: string;
+    image: string | null;
+    url: string | null;
+    sold_date: string | null;
+}
+
+export interface Filters {
+    make: string | null;
+    model: string | null;
+    trim: string | null;
+    mileage: number | null;
+    exteriorColor: string | null;
+    interiorColor: string | null;
+    transmission: string | null;
+    drivetrain: string | null;
+    period: 'day' | 'week' | 'month' | null;
+    periodCount: number | null;
+    startDate: Date | null;
+    endDate: Date | null;
+    listingType: string | null;
+    onlyWithPricing: boolean;
+}
+
+export interface KPIData {
+    percentageChange: number;
+    totalListings: number;
+    averageDaysOnMarket: number;
+    averagePrice: number;
 }

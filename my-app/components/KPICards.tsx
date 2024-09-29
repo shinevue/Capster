@@ -1,44 +1,58 @@
 import { FC } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, Flex, Text, Box } from '@radix-ui/themes';
 import { formatCurrency, formatNumber } from '@/lib/utils';
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { ArrowUpIcon, ArrowDownIcon } from '@radix-ui/react-icons';
+import { KPIComparison } from '@/utils/chartTransformers';
 
 interface KPICardsProps {
-    percentageChange: number; // Changed from dollarChange
-    totalListings: number;
-    averageDaysOnMarket: number;
-    averagePrice: number;
+    kpiComparison: KPIComparison;
 }
 
-const KPICards: FC<KPICardsProps> = ({ percentageChange, totalListings, averageDaysOnMarket, averagePrice }) => {
+const KPICards: FC<KPICardsProps> = ({ kpiComparison }) => {
+    const { current, changes } = kpiComparison;
+
+    const formatChange = (change: number, isInverse: boolean = false) => {
+        const prefix = isInverse ? (change >= 0 ? '-' : '+') : (change >= 0 ? '+' : '-');
+        return `${prefix}${Math.abs(change).toFixed(2)}%`;
+    };
+
+    const getChangeText = (change: number, isInverse: boolean = false) => {
+        const direction = isInverse ? (change >= 0 ? 'decrease' : 'increase') : (change >= 0 ? 'increase' : 'decrease');
+        return `${formatChange(change, isInverse)} ${direction} from last period`;
+    };
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Flex direction="row" gap="5" wrap="wrap" className="mb-6 mx-auto w-[85%] md:w-full">
             <KPICard
                 title="% Change"
-                value={`${Math.abs(percentageChange).toFixed(2)}%`}
+                value={`${Math.abs(current.percentageChange).toFixed(2)}%`}
                 icon={
-                    percentageChange >= 0
-                        ? <ArrowUpIcon className="w-6 h-6 text-green-600" />
-                        : <ArrowDownIcon className="w-6 h-6 text-red-600" />
+                    current.percentageChange >= 0
+                        ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
+                        : <ArrowDownIcon height={30} width={30} className="text-red-600" />
                 }
-                className={percentageChange >= 0 ? "text-green-600" : "text-red-600"}
+                valueColor={current.percentageChange >= 0 ? "green" : "red"}
+                changeText={getChangeText(changes.percentageChange)}
             />
             <KPICard
                 title="Total Listings"
-                value={formatNumber(totalListings)}
-                className="text-blue-600"
+                value={formatNumber(current.totalListings)}
+                valueColor="blue"
+                changeText={getChangeText(changes.totalListings)}
             />
             <KPICard
                 title="Avg Days on Market"
-                value={averageDaysOnMarket.toFixed(1)}
-                className="text-purple-600"
+                value={current.averageDaysOnMarket.toFixed(1)}
+                valueColor="purple"
+                changeText={getChangeText(changes.averageDaysOnMarket, true)}
             />
             <KPICard
                 title="Average Price"
-                value={formatCurrency(averagePrice)}
-                className="text-yellow-600"
+                value={formatCurrency(current.averagePrice)}
+                valueColor="yellow"
+                changeText={getChangeText(changes.averagePrice)}
             />
-        </div>
+        </Flex>
     );
 };
 
@@ -46,24 +60,32 @@ interface KPICardProps {
     title: string;
     value: string;
     icon?: React.ReactNode;
-    className?: string;
+    valueColor?: string;
+    changeText: string;
 }
 
-const KPICard: FC<KPICardProps> = ({ title, value, icon, className }) => (
-    <Card className="relative overflow-hidden">
-        <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-gray-600">{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="flex items-center justify-between">
-                <p className={`text-2xl font-bold ${className}`}>{value}</p>
+const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText }) => (
+    <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md">
+        <Flex direction="column" gap="1" className='px-8'>
+            <Text size="2" weight="bold" color="gray">
+                {title}
+            </Text>
+            <Flex justify="between" align="center">
+                <Flex direction="column">
+                    <Text size="6" weight="bold" color={valueColor as any}>
+                        {value}
+                    </Text>
+                    <Text size="2" color="gray">
+                        {changeText}
+                    </Text>
+                </Flex>
                 {icon && (
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <Box>
                         {icon}
-                    </div>
+                    </Box>
                 )}
-            </div>
-        </CardContent>
+            </Flex>
+        </Flex>
     </Card>
 );
 

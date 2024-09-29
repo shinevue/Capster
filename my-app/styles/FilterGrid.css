@@ -1,0 +1,21 @@
+@media (max-width: 767px) {
+    button[role='combobox'] {
+        height: 70px !important;
+        padding: 0 1rem !important;
+    }
+
+    div[role="option"] {
+        height: 70px !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        border-radius: 0px !important;
+    }
+}
+  
+button[role='combobox'] {
+  font-weight: bold !important;
+  height: 40px !important;
+}
+
+.rt-SelectTriggerInner {
+    margin-right: 4rem !important;
+}
