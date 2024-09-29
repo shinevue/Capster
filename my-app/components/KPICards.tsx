@@ -28,8 +28,8 @@ const KPICards: FC<KPICardsProps> = ({ kpiComparison }) => {
                 value={`${Math.abs(current.percentageChange).toFixed(2)}%`}
                 icon={
                     current.percentageChange >= 0
-                        ? <ArrowUpIcon className="text-green-600" />
-                        : <ArrowDownIcon className="text-red-600" />
+                        ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
+                        : <ArrowDownIcon height={30} width={30} className="text-red-600" />
                 }
                 valueColor={current.percentageChange >= 0 ? "green" : "red"}
                 changeText={getChangeText(changes.percentageChange)}
@@ -66,7 +66,7 @@ interface KPICardProps {
 
 const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText }) => (
     <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md">
-        <Flex direction="column" gap="1">
+        <Flex direction="column" gap="1" className='px-8'>
             <Text size="2" weight="bold" color="gray">
                 {title}
             </Text>

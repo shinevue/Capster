@@ -12,7 +12,7 @@ export const initialFilters: Filters = {
     startDate: null,
     endDate: null,
     listing_type: null,
-    onlyWithPricing: false, // Add this new filter
+    onlyWithPricing: true, // Add this new filter
 };
 
 export const applyTimeFilter = (filters: Filters): Filters => {

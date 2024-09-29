@@ -138,9 +138,6 @@ export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, sta
 
     return (
         <div className="relative">
-            <div className="absolute top-0 right-0 bg-white bg-opacity-75 p-2 rounded text-lg text-black">
-                {entriesInTimeRange} / {totalEntries} entries
-            </div>
             <div className="mb-4 flex space-x-4">
                 <Switch.Group>
                     <div className="flex items-center">

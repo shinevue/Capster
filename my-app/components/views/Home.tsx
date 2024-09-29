@@ -11,14 +11,12 @@ import DataTable from "@/components/DataTable";
 import KPICards from "@/components/KPICards";
 import { motion } from 'framer-motion';
 import { Switch } from '@headlessui/react';
-import { CarData, Filters, KPIData } from '@/types/CarData';
+import { CarData, Filters } from '@/types/CarData';
 import { initialFilters, updateFilter, removeFilter, getActiveFilters, applyFiltersToData } from '@/utils/filterModule';
 import { calculateKPIs, calculateKPIComparison, KPIComparison } from '@/utils/chartTransformers';
 import { preloadImages } from '@/utils/imageLoader';
 import { Theme } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
-import { addDays } from "date-fns";
-import { DateRange } from "react-day-picker";
 
 export default function Home() {
     const [filters, setFilters] = useState<Filters>(initialFilters);
@@ -69,11 +67,8 @@ export default function Home() {
     const activeFilters = getActiveFilters(filters);
 
     useEffect(() => {
-        if (!filters.startDate || !filters.endDate) {
-            if (filters.period !== 'custom') {
-                handleTimeFilterChange(filters.period, filters.periodCount);
-            }
-        }
+        // Initialize with the default option (Last week)
+        handleTimeFilterChange('day', 7);
     }, []);
 
     const filteredData = useMemo(() => {
@@ -258,7 +253,13 @@ export default function Home() {
                                     <LineChartComponent
                                         data={filteredData}
                                         onTimeSelection={(startDate, endDate) => {
-                                            handleTimeFilterChange('custom', 0);
+                                            setFilters(prev => ({
+                                                ...prev,
+                                                period: 'custom',
+                                                periodCount: 0,
+                                                startDate,
+                                                endDate,
+                                            }));
                                         }}
                                         onDataSelection={() => { }}
                                         startDate={filters.startDate}
@@ -276,7 +277,13 @@ export default function Home() {
                                     <ScatterChartComponent
                                         data={filteredData}
                                         onTimeSelection={(startDate, endDate) => {
-                                            handleTimeFilterChange('custom', 0);
+                                            setFilters(prev => ({
+                                                ...prev,
+                                                period: 'custom',
+                                                periodCount: 0,
+                                                startDate,
+                                                endDate,
+                                            }));
                                         }}
                                         onDataSelection={() => { }}
                                         startDate={filters.startDate}

@@ -44,17 +44,24 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                 header: "Image",
                 cell: ({ row }) => {
                     const image = row.original.image;
-                    return image ? (
-                        <Image
-                            src={imageLoader(image)}
-                            alt={`${row.original.make} ${row.original.model}`}
-                            width={300}
-                            height={200}
-                            className="rounded"
-                        />
-                    ) : (
-                        <div className="w-24 h-24 rounded flex items-center justify-center text-gray-500 mx-auto">
-                            <span className="text-lg mx-auto">No image</span>
+                    return (
+                        <div className="w-[250px] h-[200px] rounded flex items-center justify-center">
+                            {image ? (
+                                <Image
+                                    src={imageLoader(image)}
+                                    alt={`${row.original.make} ${row.original.model}`}
+                                    width={250}
+                                    height={200}
+                                    className="rounded"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.nextSibling.style.display = 'block';
+                                    }}
+                                />
+                            ) : null}
+                            <div className="text-gray-500" style={{ display: image ? 'none' : 'block' }}>
+                                <span className="text-lg">No image found</span>
+                            </div>
                         </div>
                     );
                 },
@@ -78,6 +85,17 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                 );
             },
             enableSorting: isSortable,
+            cell: ({ getValue }) => {
+                const value = getValue() as string;
+                if (column === 'url') {
+                    return (
+                        <div className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
+                            {value}
+                        </div>
+                    );
+                }
+                return value;
+            },
         };
     });
 
@@ -125,7 +143,6 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
-                                            className='py-4'
                                             key={cell.id}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>

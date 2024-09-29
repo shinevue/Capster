@@ -101,9 +101,6 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
 
     return (
         <div className="relative">
-            <div className="absolute top-0 right-0 bg-gray-100 p-2 rounded text-lg text-gray-700">
-                {scatterData.length} entries
-            </div>
             <ResponsiveContainer width="100%" height={400}>
                 <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
