@@ -66,7 +66,7 @@ interface KPICardProps {
 
 const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText }) => (
     <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md">
-        <Flex direction="column" gap="1" className='px-8'>
+        <Flex direction="column" gap="1" className='px-4'>
             <Text size="2" weight="bold" color="gray">
                 {title}
             </Text>
