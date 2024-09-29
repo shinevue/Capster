@@ -13,7 +13,7 @@ export const initialFilters: Filters = {
     periodCount: 7,
     startDate: null,
     endDate: null,
-    listing_type: null,
+    listingType: null,
     onlyWithPricing: true, // Add this new filter
 };
 
@@ -102,7 +102,7 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         const matchesColor = (carColor: string | null, filterColor: string | null) =>
             !filterColor || (carColor && carColor.toLowerCase().includes(filterColor.toLowerCase()));
 
-        const matchesListingType = !filters.listing_type || car.listing_type === filters.listing_type;
+        const matchesListingType = !filters.listingType || car.listingType === filters.listingType;
 
         const matchesTransmission = !filters.transmission ||
             (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));

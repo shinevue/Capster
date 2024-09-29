@@ -139,12 +139,12 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
                         fontSize={isMobile ? 10 : 14}
                         tickLine={false}
                         axisLine={false}
-                        label={isMobile ? null : { value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
+                        label={isMobile ? null : { value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 } as any}
                         tick={{
                             textAnchor: 'end',
                             angle: -45,
                             dx: -10
-                        }}
+                        } as any}
                         width={isMobile ? 50 : 100}
                     />
                     <ZAxis dataKey="z" range={[20, 60]} name="Mileage" />

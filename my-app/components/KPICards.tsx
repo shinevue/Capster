@@ -22,7 +22,7 @@ const KPICards: FC<KPICardsProps> = ({ kpiComparison }) => {
     };
 
     return (
-        <Flex direction="row" gap="5" wrap="wrap" className="mb-6">
+        <Flex direction="row" gap="5" wrap="wrap" className="mb-6 mx-auto w-[85%] md:w-full">
             <KPICard
                 title="% Change"
                 value={`${Math.abs(current.percentageChange).toFixed(2)}%`}

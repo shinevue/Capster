@@ -46,7 +46,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
         interiorColor: { label: 'Interior Color', options: colorOptions },
         transmission: { label: 'Transmission', options: transmissionOptions },
         drivetrain: { label: 'Drivetrain', options: uniqueOptions('drivetrain') },
-        listing_type: { label: 'Listing Type', options: uniqueOptions('listing_type') },
+        listingType: { label: 'Listing Type', options: uniqueOptions('listingType') },
         startDate: { label: 'Start Date', options: [] }, // Handled separately
         endDate: { label: 'End Date', options: [] }, // Handled separately
         period: { label: 'Period', options: [] }, // Handled separately
@@ -55,7 +55,6 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
     };
 
     return (
-        // break if more than 4 filters
         <div className="flex gap-6 mb-8 flex-wrap">
             {Object.entries(filterConfig).map(([key, config]) => {
                 if (!includedFilters.includes(key as keyof Filters)) return null;
@@ -75,7 +74,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                 }
 
                 return (
-                    <div key={key} className="flex-grow max-w-xs space-y-2">
+                    <div key={key} className="flex-grow max-w-xs space-y-2 mr-4">
                         {/* <Text as="label" size="2" weight="bold" className="block mb-1 text-gray-700">
                             {config.label}
                         </Text> */}

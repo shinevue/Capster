@@ -115,7 +115,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: isMobile ? getPaginationRowModel() : undefined,
         state: {
             sorting,
             columnFilters,
@@ -128,8 +128,10 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
         trackMouse: true
     });
 
+    const swipeableProps = isMobile ? handlers : {};
+
     return (
-        <div className="overflow-x-auto" {...handlers}>
+        <div className="overflow-x-auto" {...swipeableProps}>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>

@@ -11,7 +11,7 @@ export interface CarData {
     exterior_color: string | null;
     transmission: string | null;
     drivetrain: string | null;
-    listing_type: string | null;
+    listingType: string | null;
     photos: string;
     image: string | null;
     url: string | null;
@@ -31,7 +31,7 @@ export interface Filters {
     periodCount: number | null;
     startDate: Date | null;
     endDate: Date | null;
-    listing_type: string | null;
+    listingType: string | null;
     onlyWithPricing: boolean;
 }
 

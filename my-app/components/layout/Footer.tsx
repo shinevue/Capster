@@ -1,9 +1,11 @@
-import Image from "next/image";
-
 export default function Footer() {
     return (
-        <footer className="bg-gray-200 p-4 text-center">
-            <p className="text-sm text-gray-600">© 2023 My App</p>
+        <footer className="bg-white shadow-md">
+            <div className="container mx-auto px-6 py-3">
+                <p className="text-center text-gray-600">
+                    © {new Date().getFullYear()} Car Sales Dashboard. All rights reserved.
+                </p>
+            </div>
         </footer>
     );
 }

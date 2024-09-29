@@ -225,8 +225,8 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
                             tick={{
                                 textAnchor: 'end',
                                 angle: -45,
-                                dx: -10
-                            }}
+                                dx: -10,
+                            } as any}
                             width={isMobile ? 50 : 100}
                         />
                         <Tooltip content={<CustomTooltip />} />
