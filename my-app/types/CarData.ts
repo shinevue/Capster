@@ -27,8 +27,8 @@ export interface Filters {
     interiorColor: string | null;
     transmission: string | null;
     drivetrain: string | null;
-    period: 'day' | 'week' | 'month' | 'custom';
-    periodCount: number;
+    period: 'day' | 'week' | 'month' | null;
+    periodCount: number | null;
     startDate: Date | null;
     endDate: Date | null;
     listing_type: string | null;

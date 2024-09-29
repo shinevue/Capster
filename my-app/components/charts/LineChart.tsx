@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useMemo, useState } from "react";
 import { Switch } from '@headlessui/react';
@@ -30,7 +31,7 @@ const parseDate = (dateString: string | null): Date | null => {
 const formatPrice = (value: number | null | undefined): string =>
     value == null ? 'N/A' : `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export const LineChartComponent = ({ data, onDataSelection, onTimeSelection, startDate, endDate }: LineChartComponentProps) => {
+export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, onDataSelection, onTimeSelection, startDate, endDate }) => {
     const [showMainLine, setShowMainLine] = useState(true);
     const [show7DayMA, setShow7DayMA] = useState(false);
     const [show30DayMA, setShow30DayMA] = useState(false);

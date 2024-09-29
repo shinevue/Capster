@@ -1,6 +1,8 @@
 import { Filters, CarData } from '@/types/CarData';
 
 export const initialFilters: Filters = {
+    make: null,
+    model: null,
     trim: null,
     mileage: null,
     exteriorColor: null,
@@ -21,15 +23,15 @@ export const applyTimeFilter = (filters: Filters): Filters => {
 
     switch (filters.period) {
         case 'day':
-            startDate.setDate(endDate.getDate() - filters.periodCount);
+            startDate.setDate(endDate.getDate() - (filters.periodCount || 0));
             break;
         case 'week':
-            startDate.setDate(endDate.getDate() - filters.periodCount * 7);
+            startDate.setDate(endDate.getDate() - (filters.periodCount || 0) * 7);
             break;
         case 'month':
-            startDate.setMonth(endDate.getMonth() - filters.periodCount);
+            startDate.setMonth(endDate.getMonth() - (filters.periodCount || 0));
             break;
-        case 'custom':
+        default:
             return filters; // Don't modify custom date range
     }
 
@@ -75,11 +77,22 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         } else {
             car.image = null;
         }
+        
+        // TODO: establish a proper date format
+        var carDate = null;
+        if (car?.date_listed) {
+            var [month, day, year] = car?.date_listed?.split('-').map(Number);
+            if (year?.toString().length == 2) {
+                year = year + 2000;
+            }
 
-        const carDate = car.date_listed ? new Date(car.date_listed) : null;
+            carDate = new Date(year, month, day);
+        }
+
+        carDate = carDate;
         const isInTimeRange = carDate && filters.startDate && filters.endDate
-            ? carDate >= filters.startDate && carDate <= filters.endDate
-            : true;
+        ? carDate >= filters.startDate && carDate <= filters.endDate
+        : true;
 
         // Skip listings with null prices if onlyWithPricing is true
         if (filters.onlyWithPricing && (car.price === null || car.price === undefined)) {
