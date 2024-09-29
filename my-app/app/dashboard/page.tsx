@@ -112,7 +112,7 @@ export default function Dashboard() {
     // Create a memoized image loader function
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
-    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
+    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
     const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'onlyWithPricing'];
 
     const isMobile = useMediaQuery({ maxWidth: 767 });

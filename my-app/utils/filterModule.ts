@@ -15,6 +15,7 @@ export const initialFilters: Filters = {
     endDate: null,
     listingType: null,
     onlyWithPricing: true, // Add this new filter
+    year: null,
 };
 
 export const applyTimeFilter = (filters: Filters): Filters => {
@@ -115,7 +116,8 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             matchesTransmission &&
             (!filters.drivetrain || car.drivetrain === filters.drivetrain) &&
             matchesListingType &&
-            isInTimeRange
+            isInTimeRange &&
+            (!filters.year || car.year === filters.year)
         );
     });
 };

@@ -33,6 +33,7 @@ export interface Filters {
     endDate: Date | null;
     listingType: string | null;
     onlyWithPricing: boolean;
+    year: string | null;
 }
 
 export interface KPIData {
