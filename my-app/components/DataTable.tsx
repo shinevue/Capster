@@ -89,13 +89,13 @@ const DataTable = <T extends Record<string, any>>({
                 cell: ({ row }: { row: any; }) => {
                     const image = row.original.image;
                     return (
-                        <div className={`${isMobile ? 'w-[100px] h-[80px]' : 'w-[150px] h-[120px]'} rounded flex items-center justify-center`}>
+                        <div className='w-[75px] h-[60px] rounded flex items-center justify-center'>
                             {image ? (
                                 <Image
                                     src={imageLoader(image)}
                                     alt={`${row.original.make} ${row.original.model}`}
-                                    width={isMobile ? 100 : 150}
-                                    height={isMobile ? 80 : 100}
+                                    width={75}
+                                    height={60}
                                     className="rounded object-cover"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
