@@ -13,6 +13,7 @@ import { calculateKPIs, calculateKPIComparison, KPIComparison } from '@/lib/char
 import { preloadImages } from '@/lib/imageLoader';
 import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
+import { FilterGrid } from '@/components/FilterGrid';
 
 export default function Dashboard() {
     const { user, isLoading } = useAuth();
@@ -89,18 +90,28 @@ export default function Dashboard() {
     // Create a memoized image loader function
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
+    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
+    const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'onlyWithPricing'];
+
     return (
         <DashboardLayout>
+            <FilterGrid
+                data={filteredData}
+                currentFilters={filters}
+                onApplyFilters={handleApplyFilters}
+                includedFilters={topFilters}
+            />
+
+            <div className="mt-5 mb-10">
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} />}
+            </div>
+
             <FilterSection
                 filteredData={filteredData}
                 filters={filters}
                 handleApplyFilters={handleApplyFilters}
                 handleTimeFilterChange={handleTimeFilterChange}
             />
-
-            <div className="mt-5 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} />}
-            </div>
 
             <ChartSection
                 filteredData={filteredData}

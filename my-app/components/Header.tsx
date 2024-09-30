@@ -61,34 +61,8 @@ export default function Header() {
 
               <UserMenu />
             </>
-            // ) : (
-            //   <>
-            //     <motion.button
-            //       onClick={toggleTheme}
-            //       className="p-2 rounded-full hover:bg-muted transition-colors"
-            //       whileHover={{ scale: 1.05 }}
-            //       whileTap={{ scale: 0.95 }}
-            //       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            //     >
-            //       {theme === "dark" ? (
-            //         <SunIcon className="h-5 w-5 text-foreground" />
-            //       ) : (
-            //         <MoonIcon className="h-5 w-5 text-foreground" />
-            //       )}
-            //     </motion.button>
-            //     <Link href="/login">
-            //       <motion.button
-            //         className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-            //         whileHover={{ scale: 1.05 }}
-            //         whileTap={{ scale: 0.95 }}
-            //       >
-            //         Sign In
-            //       </motion.button>
-            //     </Link>
-            //   </>
-            // )}
           </div>
-    </div>
+        </div>
       </div >
     </motion.header >
   );

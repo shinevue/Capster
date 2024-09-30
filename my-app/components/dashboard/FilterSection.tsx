@@ -27,12 +27,12 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
     return (
         <>
-            <FilterGrid
+            {/* <FilterGrid
                 data={filteredData}
                 currentFilters={filters}
                 onApplyFilters={handleApplyFilters}
                 includedFilters={topFilters}
-            />
+            /> */}
 
             {isMobile ? (
                 <Dialog.Root open={isFilterModalOpen} onOpenChange={setIsFilterModalOpen}>
