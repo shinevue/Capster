@@ -13,7 +13,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
     const tableColumns: (keyof CarData)[] = [
         'image',
         'url',
-        "listingType",
+        "listing_type",
         'price',
         'year',
         'make',
@@ -33,6 +33,10 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         "date_listed"
     ];
 
+    const formatPrice = (price: number) => {
+        return `${price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
+    };
+
     if (!showDataTable) return null;
 
     return (
@@ -47,6 +51,9 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                 columns={tableColumns}
                 sortableColumns={sortableColumns}
                 imageLoader={imageLoader}
+                formatters={{
+                    price: formatPrice
+                }}
             />
         </motion.div>
     );

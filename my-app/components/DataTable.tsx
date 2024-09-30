@@ -32,9 +32,12 @@ interface DataTableProps {
     columns: (keyof CarData)[];
     sortableColumns: (keyof CarData)[];
     imageLoader: (src: string) => string;
+    formatters?: {
+        [key in keyof CarData]?: (value: any) => string;
+    };
 }
 
-const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, imageLoader }) => {
+const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, imageLoader, formatters }) => {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const isMobile = useMediaQuery({ maxWidth: 767 });
@@ -95,6 +98,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
             enableSorting: isSortable,
             cell: ({ getValue }) => {
                 const value = getValue() as string;
+
                 if (column === 'url') {
                     return (
                         <div className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
@@ -102,10 +106,24 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                         </div>
                     );
                 }
+                if (formatters && formatters[column]) {
+                    const formattedValue = formatters[column](value);
+                    return formattedValue;
+                }
                 return value;
             },
         };
     });
+
+    const renderCell = (item: CarData, column: keyof CarData) => {
+        const value = item[column];
+
+        if (formatters && formatters[column]) {
+            return formatters[column](value);
+        }
+
+        return value;
+    };
 
     const table = useReactTable({
         data,
