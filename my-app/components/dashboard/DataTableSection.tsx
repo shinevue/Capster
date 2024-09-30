@@ -67,7 +67,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
 
     const formatUrl = formatWithNA((url: string) => (
         <Link href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-            View Listing
+            Link
         </Link>
     ));
 
