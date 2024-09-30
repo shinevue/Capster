@@ -36,15 +36,21 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         "mileage"
     ];
 
-    const formatPrice = (price: number) => {
-        return `${price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
+    const formatWithNA = <T,>(formatter: (value: T) => React.ReactNode) => (value: T | null) => {
+        return value === null ? "N/A" : formatter(value);
     };
 
-    const formatUrl = (url: string) => (
+    const formatPrice = formatWithNA((price: number) => {
+        return `${price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
+    });
+
+    const formatUrl = formatWithNA((url: string) => (
         <Link href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
             View Listing
         </Link>
-    );
+    ));
+
+    const formatDefault = formatWithNA((value: any) => String(value));
 
     if (!showDataTable) return null;
 
@@ -62,7 +68,8 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                 imageLoader={imageLoader}
                 formatters={{
                     price: formatPrice,
-                    url: formatUrl
+                    url: formatUrl,
+                    ...Object.fromEntries(tableColumns.map(column => [column, formatDefault]))
                 }}
             />
         </motion.div>
