@@ -35,7 +35,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                {pathname !== "/dashboard" ? (
+                {/* {pathname !== "/dashboard" ? (
                   <Link href={"/dashboard"}>
                     <motion.button
                       className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
@@ -57,7 +57,17 @@ export default function Header() {
                       <span className="hidden sm:inline">Home</span>
                     </motion.button>
                   </Link>
-                )}
+                )} */}
+                <Link href={"/dashboard"}>
+                  <motion.button
+                    className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <DashboardIcon className="sm2:h-4 sm2:w-4 sm3:h-5 sm:w-5" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </motion.button>
+                </Link>
 
                 <UserMenu />
               </>
