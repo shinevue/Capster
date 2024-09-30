@@ -20,6 +20,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         'make',
         'model',
         'trim',
+        'mileage',
         'exterior_color',
         'interior_color',
         'transmission',
@@ -31,7 +32,8 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         'year',
         'make',
         'model',
-        "date_listed"
+        "date_listed",
+        "mileage"
     ];
 
     const formatPrice = (price: number) => {
