@@ -57,7 +57,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
         interiorColor: { label: 'Interior Color', options: colorOptions },
         transmission: { label: 'Transmission', options: transmissionOptions },
         drivetrain: { label: 'Drivetrain', options: uniqueOptions('drivetrain') },
-        listingType: { label: 'Listing Type', options: uniqueOptions('listingType') },
+        listingType: { label: 'Listing Type', options: uniqueOptions('listing_type') },
         startDate: { label: 'Start Date', options: [] }, // Handled separately
         endDate: { label: 'End Date', options: [] }, // Handled separately
         period: { label: 'Period', options: [] }, // Handled separately
