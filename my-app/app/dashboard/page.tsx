@@ -90,8 +90,7 @@ export default function Dashboard() {
     // Create a memoized image loader function
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
-    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
-    const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'onlyWithPricing'];
+    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
 
     return (
         <DashboardLayout>
