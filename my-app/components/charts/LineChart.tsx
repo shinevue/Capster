@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { CarData } from '@/types/CarData';
 import { useMediaQuery } from 'react-responsive'; // Add this import
 import { motion } from 'framer-motion';
-import { ChartToggleButton } from '@/components/ui/chartToggleButton';
+import { ChartToggleButton } from '@/components/chartToggleButton';
 import { FaChartLine } from 'react-icons/fa'; // Updated import
 
 interface LineChartComponentProps {
@@ -125,7 +125,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
 
             if (isMobile) {
                 return (
-                    <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs">
+                    <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs dark:text-black">
                         <p className="label font-bold">{formatXAxis(label)}</p>
                         {showMainLine && (
                             <p>{`Avg: ${formatPrice(data.averagePrice)}`}</p>
@@ -176,7 +176,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
 
     return (
         <div className="relative w-full">
-            <div className="mb-4 flex flex-wrap gap-2">
+            <div className="mb-4 flex flex-wrap gap-1 md:gap-2">
                 <ChartToggleButton
                     icon={<FaChartLine />}
                     label="Main Line"

@@ -2,7 +2,18 @@
 
 import React from 'react';
 import { CarData, Filters } from '@/types/CarData';
-import { Select, Switch, Text } from '@radix-ui/themes';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
 import '../styles/FilterGrid.css';
 
 interface FilterGridProps {
@@ -41,7 +52,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
         make: { label: 'Make', options: uniqueOptions('make') },
         model: { label: 'Model', options: uniqueOptions('model') },
         trim: { label: 'Trim', options: uniqueOptions('trim') },
-        mileage: { label: 'Max Mileage', options: mileageRanges },
+        mileage: { label: 'Mileage', options: mileageRanges },
         exteriorColor: { label: 'Exterior Color', options: colorOptions },
         interiorColor: { label: 'Interior Color', options: colorOptions },
         transmission: { label: 'Transmission', options: transmissionOptions },
@@ -67,32 +78,37 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                                 checked={currentFilters.onlyWithPricing}
                                 onCheckedChange={(checked) => handleFilterChange('onlyWithPricing', checked)}
                             />
-                            <Text as="label" size="2" weight="bold" className="text-gray-700">
+                            <Label className="text-sm font-medium text-gray-700">
                                 Only With Pricing
-                            </Text>
+                            </Label>
                         </div>
                     );
                 }
 
                 return (
                     <div key={key} className="flex-grow max-w-xs space-y-2 mr-4">
-                        {/* <Text as="label" size="2" weight="bold" className="block mb-1 text-gray-700">
-                            {config.label}
-                        </Text> */}
-                        <Select.Root
+                        <Select
                             value={(currentFilters[key as keyof Filters] as string) || 'all'}
                             onValueChange={(value) => handleFilterChange(key as keyof Filters, value)}
                         >
-                            <Select.Trigger className="!w-[250px]" />
-                            <Select.Content>
-                                <Select.Item value="all">All {config.label}s</Select.Item>
-                                {config.options.map((option) => (
-                                    <Select.Item key={option.value || option} value={option.value?.toString() || option}>
-                                        {option.label || option}
-                                    </Select.Item>
-                                ))}
-                            </Select.Content>
-                        </Select.Root>
+                            <SelectTrigger className="w-[250px]">
+                                <SelectValue placeholder={`Select ${config.label}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>{config.label}</SelectLabel>
+                                    <SelectItem value="all">All {config.label}s</SelectItem>
+                                    {config.options.map((option) => (
+                                        <SelectItem
+                                            key={option.value?.toString() || option}
+                                            value={option.value?.toString() || option}
+                                        >
+                                            {option.label || option}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                 );
             })}

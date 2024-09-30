@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { Card, Flex, Text, Box } from '@radix-ui/themes';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { ArrowUpIcon, ArrowDownIcon } from '@radix-ui/react-icons';
-import { KPIComparison } from '@/utils/chartTransformers';
+import { KPIComparison } from '@/lib/chartTransformers';
 
 interface KPICardsProps {
     kpiComparison: KPIComparison;
