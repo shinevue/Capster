@@ -1,4 +1,4 @@
-import { CarData, Filters, KPIData } from '@/types/CarData';
+import { CarData, KPIData } from '@/types/CarData';
 
 export const calculateKPIs = (data: CarData[]): KPIData => {
     const validPriceData = data.filter(car => car.price !== null && car.price > 0);
