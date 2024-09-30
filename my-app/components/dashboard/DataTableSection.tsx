@@ -78,15 +78,15 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
     const formatDefault = formatWithNA((value: any) => String(value));
 
     const columnWidths: Partial<Record<keyof CarData, string>> = {
-        image: '150px',
-        url: '100px',
-        listing_type: '100px',
+        image: '100px',
+        url: '60px',
+        listing_type: '60px',
         price: '100px',
         year: '80px',
         make: '100px',
         model: '100px',
         trim: '100px',
-        mileage: '100px',
+        mileage: '80px',
         exterior_color: '100px',
         interior_color: '100px',
         transmission: '120px',
