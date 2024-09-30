@@ -68,7 +68,7 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
             const data = payload[0].payload;
             if (isMobile) {
                 return (
-                    <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs">
+                    <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs dark:text-black">
                         <p className="label font-bold">{`${data.year} ${data.make} ${data.model}`}</p>
                         <p>{`Price: ${formatPrice(data.y)}`}</p>
                         <p>{`Listed: ${formatXAxis(data.x)}`}</p>

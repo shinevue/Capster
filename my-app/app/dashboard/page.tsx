@@ -9,12 +9,12 @@ import DataTable from "@/components/DataTable";
 import KPICards from "@/components/KPICards";
 import { motion, AnimatePresence } from 'framer-motion';
 import { CarData, Filters } from '@/types/CarData';
-import { initialFilters, applyFiltersToData } from '@/utils/filterModule';
-import { calculateKPIs, calculateKPIComparison, KPIComparison } from '@/utils/chartTransformers';
-import { preloadImages } from '@/utils/imageLoader';
+import { initialFilters, applyFiltersToData } from '@/lib/filterModule';
+import { calculateKPIs, calculateKPIComparison, KPIComparison } from '@/lib/chartTransformers';
+import { preloadImages } from '@/lib/imageLoader';
 import { useMediaQuery } from 'react-responsive';
 import { FaChartLine, FaChartBar, FaTable, FaFilter, FaCog } from 'react-icons/fa';
-import { ChartToggleButton } from '@/components/ui/chartToggleButton';
+import { ChartToggleButton } from '@/components/chartToggleButton';
 import * as Dialog from '@radix-ui/react-dialog';
 
 export default function Dashboard() {
@@ -122,14 +122,14 @@ export default function Dashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="min-h-screen w-full flex flex-col text-gray-800 overflow-hidden mt-10 md:mt-20"
+            className="min-h-screen w-full flex flex-col text-gray-800 dark:text-gray-200 overflow-hidden mt-10 md:mt-20"
         >
             <main className="flex-grow flex flex-col overflow-hidden relative">
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    className="bg-white p-2 md:p-10 w-full h-full flex flex-col overflow-hidden md:w-[90%] md:mx-auto"
+                    className="bg-white dark:bg-gray-900 p-2 md:p-10 w-full h-full flex flex-col overflow-hidden md:w-[90%] md:mx-auto"
                 >
                     {/* Top FilterGrid for make, model, variant, trim */}
                     <FilterGrid
@@ -149,7 +149,7 @@ export default function Dashboard() {
                         <Dialog.Root open={isFilterModalOpen} onOpenChange={setIsFilterModalOpen}>
                             <Dialog.Trigger asChild>
                                 <button
-                                    className="fixed right-4 top-20 z-50 p-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                                    className="fixed right-4 top-20 z-50 p-3 bg-blue-500 dark:bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-600 dark:hover:bg-blue-700  duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                                     aria-label="Open filters"
                                 >
                                     <FaFilter size={20} />
@@ -174,9 +174,9 @@ export default function Dashboard() {
                                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                                 exit={{ opacity: 0, scale: 0.95, x: "100%" }}
                                                 transition={{ duration: 0.2 }}
-                                                className="fixed top-0 right-0 h-full w-full max-w-sm bg-white p-6 shadow-xl overflow-y-auto"
+                                                className="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-800 p-6 shadow-xl overflow-y-auto"
                                             >
-                                                <Dialog.Title className="text-xl font-bold mb-4">Filters</Dialog.Title>
+                                                <Dialog.Title className="text-xl font-bold mb-4 dark:text-gray-200">Filters</Dialog.Title>
                                                 <FilterGrid
                                                     data={filteredData as CarData[]}
                                                     currentFilters={filters}
@@ -187,7 +187,7 @@ export default function Dashboard() {
                                                     includedFilters={otherFilters.filter(filter => filter !== 'onlyWithPricing')}
                                                 />
                                                 <Dialog.Close asChild>
-                                                    <button className="mt-4 p-2 px-6 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200">Close</button>
+                                                    <button className="mt-4 p-2 px-6 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">Close</button>
                                                 </Dialog.Close>
                                             </motion.div>
                                         </Dialog.Content>
@@ -207,20 +207,20 @@ export default function Dashboard() {
                     <div className="mb-8 flex justify-end">
                         <motion.div whileHover={{ scale: 1.05 }} className="relative">
                             <select
-                                className="appearance-none bg-white text-gray-800 border border-gray-300 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-md"
+                                className="appearance-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 shadow-md"
                                 value={`${filters.period}-${filters.periodCount}`}
                                 onChange={(e) => {
                                     const [period, count] = e.target.value.split('-');
                                     handleTimeFilterChange(period as 'day' | 'week' | 'month', parseInt(count));
                                 }}
                             >
-                                <option value="day-7" >Last week</option>
+                                <option value="day-7">Last week</option>
                                 <option value="day-30">Last 30 days</option>
                                 <option value="month-3">Last 3 months</option>
                                 <option value="month-6">Last 6 months</option>
                                 <option value="month-12">Last 12 months</option>
                             </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
                                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                                 </svg>
@@ -232,7 +232,7 @@ export default function Dashboard() {
                         <Dialog.Root open={isChartSettingsOpen} onOpenChange={setIsChartSettingsOpen}>
                             <Dialog.Trigger asChild>
                                 <button
-                                    className="fixed right-4 top-36 z-50 p-3 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+                                    className="fixed right-4 top-36 z-50 p-3 bg-blue-500 dark:bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                                     aria-label="Chart settings"
                                 >
                                     <FaCog size={20} />
@@ -257,34 +257,34 @@ export default function Dashboard() {
                                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                                 exit={{ opacity: 0, scale: 0.95, x: "100%" }}
                                                 transition={{ duration: 0.2 }}
-                                                className="fixed top-0 right-0 h-full w-full max-w-sm bg-white p-6 shadow-xl overflow-y-auto"
+                                                className="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-800 p-6 shadow-xl overflow-y-auto"
                                             >
-                                                <Dialog.Title className="text-xl font-bold mb-4">Chart Settings</Dialog.Title>
+                                                <Dialog.Title className="text-xl font-bold mb-4 dark:text-gray-200">Chart Settings</Dialog.Title>
                                                 <div className="flex flex-col space-y-4">
                                                     <ChartToggleButton
                                                         icon={<FaChartLine />}
                                                         label="Line Chart"
                                                         isActive={showLineChart}
                                                         onClick={() => setShowLineChart(!showLineChart)}
-                                                        color="bg-blue-500"
+                                                        color="bg-blue-500 dark:bg-blue-600"
                                                     />
                                                     <ChartToggleButton
                                                         icon={<FaChartBar />}
                                                         label="Scatter Chart"
                                                         isActive={showScatterChart}
                                                         onClick={() => setShowScatterChart(!showScatterChart)}
-                                                        color="bg-blue-500"
+                                                        color="bg-blue-500 dark:bg-blue-600"
                                                     />
                                                     <ChartToggleButton
                                                         icon={<FaTable />}
                                                         label="Data Table"
                                                         isActive={showDataTable}
                                                         onClick={() => setShowDataTable(!showDataTable)}
-                                                        color="bg-blue-500"
+                                                        color="bg-blue-500 dark:bg-blue-600"
                                                     />
                                                 </div>
                                                 <Dialog.Close asChild>
-                                                    <button className="mt-4 p-2 px-6 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-200">Close</button>
+                                                    <button className="mt-4 p-2 px-6 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">Close</button>
                                                 </Dialog.Close>
                                             </motion.div>
                                         </Dialog.Content>
@@ -299,32 +299,32 @@ export default function Dashboard() {
                                 label="Line Chart"
                                 isActive={showLineChart}
                                 onClick={() => setShowLineChart(!showLineChart)}
-                                color="bg-blue-500"
+                                color="bg-blue-500 dark:bg-blue-600"
                             />
                             <ChartToggleButton
                                 icon={<FaChartBar />}
                                 label="Scatter Chart"
                                 isActive={showScatterChart}
                                 onClick={() => setShowScatterChart(!showScatterChart)}
-                                color="bg-blue-500"
+                                color="bg-blue-500 dark:bg-blue-600"
                             />
                             <ChartToggleButton
                                 icon={<FaTable />}
                                 label="Data Table"
                                 isActive={showDataTable}
                                 onClick={() => setShowDataTable(!showDataTable)}
-                                color="bg-blue-500"
+                                color="bg-blue-500 dark:bg-blue-600"
                             />
                         </div>
                     )}
 
-                    <div className="flex flex-col space-y-20 overflow-hidden">
+                    <div className="flex flex-col space-y-20 overflow-hidden px-1 md:px-0">
                         {showLineChart && (
                             <motion.div
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4, duration: 0.5 }}
-                                className={`bg-white rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                                className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
                             >
                                 <LineChartComponent
                                     data={filteredData}
@@ -340,7 +340,7 @@ export default function Dashboard() {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.4, duration: 0.5 }}
-                                className={`bg-white rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                                className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
                             >
                                 <ScatterChartComponent
                                     data={filteredData}
@@ -348,7 +348,7 @@ export default function Dashboard() {
                                     onDataSelection={() => { }}
                                     startDate={filters.startDate}
                                     endDate={filters.endDate}
-                                    imageLoader={imageLoader}  // Pass the imageLoader function
+                                    imageLoader={imageLoader}
                                 />
                             </motion.div>
                         )}
@@ -357,7 +357,7 @@ export default function Dashboard() {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ delay: 0.8, duration: 0.5 }}
-                                className="bg-white rounded-xl md:p-6 shadow-lg flex-grow overflow-auto"
+                                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg flex-grow overflow-auto"
                             >
                                 <DataTable
                                     data={filteredData}
