@@ -11,7 +11,7 @@ export interface CarData {
     exterior_color: string | null;
     transmission: string | null;
     drivetrain: string | null;
-    listingType: string | null;
+    listing_type: string | null;
     photos: string;
     image: string | null;
     url: string | null;

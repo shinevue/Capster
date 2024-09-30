@@ -103,7 +103,7 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         const matchesColor = (carColor: string | null, filterColor: string | null) =>
             !filterColor || (carColor && carColor.toLowerCase().includes(filterColor.toLowerCase()));
 
-        const matchesListingType = !filters.listingType || car.listingType === filters.listingType;
+        const matchesListingType = !filters.listingType || car.listing_type === filters.listingType;
 
         const matchesTransmission = !filters.transmission ||
             (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));
