@@ -71,6 +71,10 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         </Link>
     ));
 
+    const formatMileage = formatWithNA((mileage: number) => {
+        return `${mileage.toLocaleString('en-US')} mi`;
+    });
+
     const formatDefault = formatWithNA((value: any) => String(value));
 
     const columnWidths: Partial<Record<keyof CarData, string>> = {
@@ -115,7 +119,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                     make: formatDefault,
                     model: formatDefault,
                     trim: formatDefault,
-                    mileage: formatDefault,
+                    mileage: formatMileage,
                     exterior_color: formatDefault,
                     interior_color: formatDefault,
                     transmission: formatDefault,
