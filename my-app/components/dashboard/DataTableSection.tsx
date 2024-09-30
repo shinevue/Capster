@@ -75,7 +75,18 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         return `${mileage.toLocaleString('en-US')} mi`;
     });
 
-    const formatDefault = formatWithNA((value: any) => String(value));
+    const capitalizeFirstLetter = (value: string) => {
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    };
+
+    const formatWithCapitalization = <T,>(formatter: (value: T) => React.ReactNode) => (value: T | null) => {
+        if (value === null) return "N/A";
+        if (typeof value === 'string') {
+            return capitalizeFirstLetter(value);
+        }
+        return formatter(value);
+    };
+    const formatDefault = formatWithCapitalization((value: any) => String(value));
 
     const columnWidths: Partial<Record<keyof CarData, string>> = {
         image: '100px',
