@@ -133,7 +133,7 @@ const DataTable = <T extends Record<string, any>>({
 
     const table = useReactTable({
         data,
-        columns: tableColumns,
+        columns: tableColumns as ColumnDef<T>[],
         getCoreRowModel: getCoreRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
@@ -210,7 +210,7 @@ const DataTable = <T extends Record<string, any>>({
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex justify-between items-center m-4">
                 <Button
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}

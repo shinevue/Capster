@@ -41,6 +41,10 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         interior_color: 'Int Color',
         transmission: 'Transmission',
         date_listed: 'Listed Date',
+        source: 'Source',
+        drivetrain: 'Drivetrain',
+        photos: 'Photos',
+        sold_date: 'Sold Date',
     };
 
     const sortableColumns: (keyof CarData)[] = [
@@ -103,7 +107,21 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                 formatters={{
                     price: formatPrice,
                     url: formatUrl,
-                    ...Object.fromEntries(tableColumns.map(column => [column, formatDefault]))
+                    source: formatDefault,
+                    date_listed: formatDefault,
+                    listing_type: formatDefault,
+                    image: formatDefault,
+                    year: formatDefault,
+                    make: formatDefault,
+                    model: formatDefault,
+                    trim: formatDefault,
+                    mileage: formatDefault,
+                    exterior_color: formatDefault,
+                    interior_color: formatDefault,
+                    transmission: formatDefault,
+                    drivetrain: formatDefault,
+                    photos: formatDefault,
+                    sold_date: formatDefault,
                 }}
                 columnWidths={columnWidths}
             />
