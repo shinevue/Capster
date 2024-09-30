@@ -33,31 +33,9 @@ export default function Header() {
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            {user ? (
-              <>
-                {/* {pathname !== "/dashboard" ? (
-                  <Link href={"/dashboard"}>
-                    <motion.button
-                      className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <DashboardIcon className="sm2:h-4 sm2:w-4 sm3:h-5 sm:w-5" />
-                      <span className="hidden sm:inline">Dashboard</span>
-                    </motion.button>
-                  </Link>
-                ) : (
-                  <Link href={"/"}>
-                    <motion.button
-                      className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <HomeIcon className="sm2:h-4 sm2:w-4 sm3:h-5 sm:w-5" />
-                      <span className="hidden sm:inline">Home</span>
-                    </motion.button>
-                  </Link>
-                )} */}
+            {/* {user ? ( */}
+            <>
+              {pathname !== "/dashboard" ? (
                 <Link href={"/dashboard"}>
                   <motion.button
                     className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
@@ -68,38 +46,50 @@ export default function Header() {
                     <span className="hidden sm:inline">Dashboard</span>
                   </motion.button>
                 </Link>
-
-                <UserMenu />
-              </>
-            ) : (
-              <>
-                <motion.button
-                  onClick={toggleTheme}
-                  className="p-2 rounded-full hover:bg-muted transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                >
-                  {theme === "dark" ? (
-                    <SunIcon className="h-5 w-5 text-foreground" />
-                  ) : (
-                    <MoonIcon className="h-5 w-5 text-foreground" />
-                  )}
-                </motion.button>
-                <Link href="/login">
+              ) : (
+                <Link href={"/"}>
                   <motion.button
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                    className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Sign In
+                    <HomeIcon className="sm2:h-4 sm2:w-4 sm3:h-5 sm:w-5" />
+                    <span className="hidden sm:inline">Home</span>
                   </motion.button>
                 </Link>
-              </>
-            )}
+              )}
+
+              <UserMenu />
+            </>
+            // ) : (
+            //   <>
+            //     <motion.button
+            //       onClick={toggleTheme}
+            //       className="p-2 rounded-full hover:bg-muted transition-colors"
+            //       whileHover={{ scale: 1.05 }}
+            //       whileTap={{ scale: 0.95 }}
+            //       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            //     >
+            //       {theme === "dark" ? (
+            //         <SunIcon className="h-5 w-5 text-foreground" />
+            //       ) : (
+            //         <MoonIcon className="h-5 w-5 text-foreground" />
+            //       )}
+            //     </motion.button>
+            //     <Link href="/login">
+            //       <motion.button
+            //         className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+            //         whileHover={{ scale: 1.05 }}
+            //         whileTap={{ scale: 0.95 }}
+            //       >
+            //         Sign In
+            //       </motion.button>
+            //     </Link>
+            //   </>
+            // )}
           </div>
-        </div>
-      </div>
-    </motion.header>
+    </div>
+      </div >
+    </motion.header >
   );
 }
