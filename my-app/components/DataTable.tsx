@@ -27,17 +27,25 @@ import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMediaQuery } from 'react-responsive';
 import { useSwipeable } from 'react-swipeable';
 
-interface DataTableProps {
-    data: CarData[];
-    columns: (keyof CarData)[];
-    sortableColumns: (keyof CarData)[];
+interface DataTableProps<T> {
+    data: T[];
+    columns: (keyof T)[];
+    columnDisplayNames: Record<keyof T, string>;
+    sortableColumns: (keyof T)[];
     imageLoader: (src: string) => string;
-    formatters?: {
-        [key in keyof CarData]?: (value: any) => string;
-    };
+    formatters: Record<keyof T, (value: any) => React.ReactNode>;
+    columnWidths: Partial<Record<keyof T, string>>;
 }
 
-const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, imageLoader, formatters }) => {
+const DataTable = <T extends Record<string, any>>({
+    data,
+    columns,
+    columnDisplayNames,
+    sortableColumns,
+    imageLoader,
+    formatters,
+    columnWidths
+}: DataTableProps<T>) => {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const isMobile = useMediaQuery({ maxWidth: 767 });
@@ -45,20 +53,49 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
     const mobileColumns: (keyof CarData)[] = ['image', 'make', 'model', 'year', 'price'];
 
     const tableColumns: ColumnDef<CarData>[] = (isMobile ? mobileColumns : columns).map(column => {
+        const baseColumnDef = {
+            accessorKey: column as string,
+            header: ({ column: tableColumn }: { column: any; }) => {
+                const title = columnDisplayNames[column];
+                return sortableColumns.includes(column) ? (
+                    <Button
+                        variant="ghost"
+                        onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
+                        className={isMobile ? "p-1 text-xs" : ""}
+                    >
+                        {title}
+                        <ArrowUpDown className={isMobile ? "ml-1 h-3 w-3" : "ml-2 h-4 w-4"} />
+                    </Button>
+                ) : (
+                    title
+                );
+            },
+            enableSorting: sortableColumns.includes(column),
+            cell: ({ getValue }: { getValue: () => any; }) => {
+                const value = getValue();
+                const formattedValue = formatters[column] ? formatters[column](value) : value;
+                return (
+                    <div className="text-wrap" style={{ maxWidth: '100%' }}>
+                        {formattedValue}
+                    </div>
+                );
+            },
+        };
+
         if (column === 'image') {
             return {
-                accessorKey: "image",
+                ...baseColumnDef,
                 header: "Image",
-                cell: ({ row }) => {
+                cell: ({ row }: { row: any; }) => {
                     const image = row.original.image;
                     return (
-                        <div className={`${isMobile ? 'w-[100px] h-[80px]' : 'w-[250px] h-[200px]'} rounded flex items-center justify-center`}>
+                        <div className={`${isMobile ? 'w-[100px] h-[80px]' : 'w-[150px] h-[120px]'} rounded flex items-center justify-center`}>
                             {image ? (
                                 <Image
                                     src={imageLoader(image)}
                                     alt={`${row.original.make} ${row.original.model}`}
-                                    width={isMobile ? 100 : 250}
-                                    height={isMobile ? 80 : 200}
+                                    width={isMobile ? 100 : 150}
+                                    height={isMobile ? 80 : 100}
                                     className="rounded object-cover"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
@@ -77,42 +114,10 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                 },
             };
         }
-        const isSortable = sortableColumns.includes(column);
+
         return {
-            accessorKey: column,
-            header: ({ column: tableColumn }) => {
-                const title = column.toString().charAt(0).toUpperCase() + column.toString().slice(1).replace(/_/g, ' ');
-                return isSortable ? (
-                    <Button
-                        variant="ghost"
-                        onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
-                        className={isMobile ? "p-1 text-xs" : ""}
-                    >
-                        {title}
-                        <ArrowUpDown className={isMobile ? "ml-1 h-3 w-3" : "ml-2 h-4 w-4"} />
-                    </Button>
-                ) : (
-                    title
-                );
-            },
-            enableSorting: isSortable,
-            cell: ({ getValue }) => {
-                const value = getValue() as string;
-
-                var formattedValue = value;
-                if (formatters && formatters[column]) {
-                    formattedValue = formatters[column](value);
-                }
-
-                if (column === 'url') {
-                    return (
-                        <div className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
-                            {formattedValue}
-                        </div>
-                    );
-                }
-                return formattedValue;
-            },
+            ...baseColumnDef,
+            size: columnWidths[column] ? parseInt(columnWidths[column] as string) : undefined,
         };
     });
 
@@ -148,14 +153,21 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
     });
 
     return (
-        <div className="overflow-x-auto" {...handlers}>
+        <div {...handlers}>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className={isMobile ? "text-xs" : "p-2"}>
+                                    <TableHead
+                                        key={header.id}
+                                        className={`${isMobile ? "text-xs" : "p-2"}`}
+                                        style={{
+                                            width: columnWidths[header.id as keyof T],
+                                            minWidth: columnWidths[header.id as keyof T]
+                                        }}
+                                    >
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -175,7 +187,14 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className={isMobile ? "p-2 text-xs" : ""}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className={`${isMobile ? "p-2 text-xs" : ""}`}
+                                            style={{
+                                                width: columnWidths[cell.column.id as keyof T],
+                                                minWidth: columnWidths[cell.column.id as keyof T]
+                                            }}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}

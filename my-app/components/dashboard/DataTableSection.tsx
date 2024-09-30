@@ -27,11 +27,28 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         'date_listed',
     ];
 
+    const columnDisplayNames: Record<keyof CarData, string> = {
+        image: 'Image',
+        url: 'URL',
+        listing_type: 'Type',
+        price: 'Price',
+        year: 'Year',
+        make: 'Make',
+        model: 'Model',
+        trim: 'Trim',
+        mileage: 'Mileage',
+        exterior_color: 'Ext Color',
+        interior_color: 'Int Color',
+        transmission: 'Transmission',
+        date_listed: 'Listed Date',
+    };
+
     const sortableColumns: (keyof CarData)[] = [
         'price',
         'year',
         'make',
         'model',
+        'trim',
         "date_listed",
         "mileage"
     ];
@@ -52,6 +69,22 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
 
     const formatDefault = formatWithNA((value: any) => String(value));
 
+    const columnWidths: Partial<Record<keyof CarData, string>> = {
+        image: '150px',
+        url: '100px',
+        listing_type: '100px',
+        price: '100px',
+        year: '80px',
+        make: '100px',
+        model: '100px',
+        trim: '100px',
+        mileage: '100px',
+        exterior_color: '100px',
+        interior_color: '100px',
+        transmission: '120px',
+        date_listed: '120px',
+    };
+
     if (!showDataTable) return null;
 
     return (
@@ -64,6 +97,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
             <DataTable
                 data={filteredData}
                 columns={tableColumns}
+                columnDisplayNames={columnDisplayNames}
                 sortableColumns={sortableColumns}
                 imageLoader={imageLoader}
                 formatters={{
@@ -71,6 +105,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                     url: formatUrl,
                     ...Object.fromEntries(tableColumns.map(column => [column, formatDefault]))
                 }}
+                columnWidths={columnWidths}
             />
         </motion.div>
     );
