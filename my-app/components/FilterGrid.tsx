@@ -63,6 +63,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
         period: { label: 'Period', options: [] }, // Handled separately
         periodCount: { label: 'Period Count', options: [] }, // Handled separately
         onlyWithPricing: { label: 'Only With Pricing', options: [] }, // Handled separately
+        year: { label: 'Year', options: uniqueOptions('year') },
     };
 
     return (
