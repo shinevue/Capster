@@ -2,6 +2,7 @@ import React from 'react';
 import DataTable from "@/components/DataTable";
 import { CarData } from '@/types/CarData';
 import { motion } from 'framer-motion';
+import Link from 'next/link'; // Add this import
 
 interface DataTableSectionProps {
     filteredData: CarData[];
@@ -37,6 +38,12 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         return `${price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`;
     };
 
+    const formatUrl = (url: string) => (
+        <Link href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+            View Listing
+        </Link>
+    );
+
     if (!showDataTable) return null;
 
     return (
@@ -52,7 +59,8 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                 sortableColumns={sortableColumns}
                 imageLoader={imageLoader}
                 formatters={{
-                    price: formatPrice
+                    price: formatPrice,
+                    url: formatUrl
                 }}
             />
         </motion.div>

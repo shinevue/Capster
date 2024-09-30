@@ -99,18 +99,19 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns, sortableColumns, i
             cell: ({ getValue }) => {
                 const value = getValue() as string;
 
+                var formattedValue = value;
+                if (formatters && formatters[column]) {
+                    formattedValue = formatters[column](value);
+                }
+
                 if (column === 'url') {
                     return (
                         <div className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
-                            {value}
+                            {formattedValue}
                         </div>
                     );
                 }
-                if (formatters && formatters[column]) {
-                    const formattedValue = formatters[column](value);
-                    return formattedValue;
-                }
-                return value;
+                return formattedValue;
             },
         };
     });
