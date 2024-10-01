@@ -26,7 +26,7 @@ export const ChartSection: React.FC<ChartSectionProps> = ({ filteredData, filter
     const isMobile = useMediaQuery({ maxWidth: 767 });
 
     return (
-        <>
+        <div className="mb-16"  >
             {isMobile ? (
                 <Dialog.Root open={isChartSettingsOpen} onOpenChange={setIsChartSettingsOpen}>
                     <Dialog.Trigger asChild>
@@ -115,7 +115,7 @@ export const ChartSection: React.FC<ChartSectionProps> = ({ filteredData, filter
                 </div>
             )}
 
-            <div className="flex flex-col space-y-20 overflow-hidden px-1 md:px-0">
+            <div className="flex flex-col space-y-20  px-1 md:px-0">
                 {showLineChart && (
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
@@ -150,6 +150,7 @@ export const ChartSection: React.FC<ChartSectionProps> = ({ filteredData, filter
                     </motion.div>
                 )}
             </div>
-        </>
+
+        </div>
     );
 };
