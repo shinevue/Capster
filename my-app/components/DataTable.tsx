@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { CarData } from '@/types/CarData';
 import {
@@ -63,11 +63,11 @@ const DataTable = <T extends Record<string, any>>({
                         onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
                         className={isMobile ? "p-1 text-xs" : ""}
                     >
-                        {title}
+                        <b>{title}</b>
                         <ArrowUpDown className={isMobile ? "ml-1 h-3 w-3" : "ml-2 h-4 w-4"} />
                     </Button>
                 ) : (
-                    title
+                    <b>{title}</b>
                 );
             },
             enableSorting: sortableColumns.includes(column),
@@ -85,11 +85,13 @@ const DataTable = <T extends Record<string, any>>({
         if (column === 'image') {
             return {
                 ...baseColumnDef,
-                header: "Image",
+                header: () => (
+                    <b>Image</b>
+                ),
                 cell: ({ row }: { row: any; }) => {
                     const image = row.original.image;
                     return (
-                        <div className='w-[75px] h-[60px] rounded flex items-center justify-center'>
+                        <div className='w-[75px] h-[60px] rounded flex items-center justify-center mx-auto'>
                             {image ? (
                                 <Image
                                     src={imageLoader(image)}
@@ -107,7 +109,7 @@ const DataTable = <T extends Record<string, any>>({
                                 />
                             ) : null}
                             <div className="text-gray-500" style={{ display: image ? 'none' : 'block' }}>
-                                <span className={isMobile ? "text-sm" : "text-lg"}>No image</span>
+                                <span className={"text-sm"}>No image</span>
                             </div>
                         </div>
                     );
@@ -162,7 +164,7 @@ const DataTable = <T extends Record<string, any>>({
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
                                         key={header.id}
-                                        className={`${isMobile ? "text-xs" : "p-2"}`}
+                                        className={`${isMobile ? "text-xs" : "p-2"} text-center`}
                                         style={{
                                             width: columnWidths[header.id as keyof T],
                                             minWidth: columnWidths[header.id as keyof T]
@@ -189,7 +191,7 @@ const DataTable = <T extends Record<string, any>>({
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
-                                            className={`${isMobile ? "p-2 text-xs" : ""}`}
+                                            className={`${isMobile ? "p-2 text-xs" : ""} text-center`}
                                             style={{
                                                 width: columnWidths[cell.column.id as keyof T],
                                                 minWidth: columnWidths[cell.column.id as keyof T]
