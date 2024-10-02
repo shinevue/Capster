@@ -23,7 +23,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
     const [isFilterModalOpen, setIsFilterModalOpen] = React.useState(false);
 
     const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
-    const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'onlyWithPricing'];
+    const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'listingType', 'onlyWithPricing'];
 
     return (
         <>
