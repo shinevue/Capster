@@ -22,7 +22,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
     const isMobile = useMediaQuery({ maxWidth: 767 });
     const [isFilterModalOpen, setIsFilterModalOpen] = React.useState(false);
 
-    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim'];
+    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
     const otherFilters: (keyof Filters)[] = ['exteriorColor', 'interiorColor', 'mileage', 'transmission', 'drivetrain', 'listingType', 'onlyWithPricing'];
 
     return (

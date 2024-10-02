@@ -106,7 +106,12 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         const matchesTransmission = !filters.transmission ||
             (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));
 
+        const matchesMake = !filters.make || (car.make && car.make.toLowerCase() === filters.make.toLowerCase());
+        const matchesModel = !filters.model || (car.model && car.model.toLowerCase() === filters.model.toLowerCase());
+
         return (
+            matchesMake &&
+            matchesModel &&
             (!filters.trim || car.trim === filters.trim) &&
             (!filters.mileage || (car.mileage !== null && car.mileage <= filters.mileage)) &&
             matchesColor(car.exterior_color, filters.exteriorColor) &&
