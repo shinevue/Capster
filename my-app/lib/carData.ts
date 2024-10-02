@@ -4,7 +4,6 @@ import { supabase } from './supabase-client'
 const pageSize = 100
 
 export async function fetchInitialCarData(): Promise<CarData[]> {
-    console.log('Fetching initial car data...')
     const { data, error } = await supabase
         .from('processed_bot_listings')
         .select('*')
@@ -14,13 +13,11 @@ export async function fetchInitialCarData(): Promise<CarData[]> {
         console.error('Error fetching initial car data:', error)
         throw error
     }
-
-    console.log(`Received ${data?.length || 0} initial records`)
+    
     return data as CarData[]
 }
 
 export async function fetchAdditionalCarData(page: number): Promise<CarData[]> {
-    console.log(`Fetching additional car data (page ${page + 1})...`)
     const { data, error } = await supabase
         .from('processed_bot_listings')
         .select('*')
@@ -32,6 +29,5 @@ export async function fetchAdditionalCarData(page: number): Promise<CarData[]> {
         throw error
     }
 
-    console.log(`Received ${data?.length || 0} additional records`)
     return data as CarData[] || []
 }

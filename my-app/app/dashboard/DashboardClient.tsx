@@ -117,7 +117,6 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
 
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
 
-            console.log("Updated KPI Comparison", comparison);
             setKpiComparison(comparison);
         } else {
             setKpiComparison(null);
@@ -146,7 +145,7 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
             />
 
             <div className="mt-5 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} />}
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={hasMore} />}
             </div>
 
             <FilterSection
