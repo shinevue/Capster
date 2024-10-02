@@ -3,6 +3,14 @@ import { supabase } from './supabase-client'
 
 const pageSize = 100
 
+// Helper function to convert string fields to lowercase
+function convertToLowerCase(obj: any): any {
+  return Object.keys(obj).reduce((acc, key) => {
+    acc[key] = typeof obj[key] === 'string' ? obj[key].toLowerCase() : obj[key];
+    return acc;
+  }, {} as any);
+}
+
 export async function fetchInitialCarData(): Promise<CarData[]> {
     const { data, error } = await supabase
         .from('processed_bot_listings')
@@ -13,8 +21,9 @@ export async function fetchInitialCarData(): Promise<CarData[]> {
         console.error('Error fetching initial car data:', error)
         throw error
     }
-    
-    return data as CarData[]
+
+    // Convert string fields to lowercase
+    return (data as CarData[]).map(convertToLowerCase);
 }
 
 export async function fetchAdditionalCarData(page: number): Promise<CarData[]> {
@@ -29,5 +38,6 @@ export async function fetchAdditionalCarData(page: number): Promise<CarData[]> {
         throw error
     }
 
-    return data as CarData[] || []
+    // Convert string fields to lowercase
+    return (data as CarData[] || []).map(convertToLowerCase);
 }
