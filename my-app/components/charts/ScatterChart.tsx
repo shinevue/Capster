@@ -16,13 +16,14 @@ interface ScatterChartComponentProps {
 
 const parseDate = (dateString: string | null): Date | null => {
     if (!dateString) return null;
-    const [month, day, year] = dateString.split('-').map(Number);
-    if (isNaN(month) || isNaN(day) || isNaN(year)) {
+    const [day, month, year] = dateString.split('/').map(Number);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
         console.warn(`Invalid date format: ${dateString}`);
         return null;
     }
     const fullYear = year < 100 ? 2000 + year : year;
-    return new Date(fullYear, month - 1, day);
+    // Create the date using UTC to avoid timezone issues
+    return new Date(Date.UTC(fullYear, month - 1, day));
 };
 
 const formatPrice = (value: number): string =>

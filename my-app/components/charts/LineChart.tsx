@@ -17,12 +17,10 @@ interface LineChartComponentProps {
     endDate: Date | null;
 }
 
-const formatDate = (date: Date): string => date.toISOString().split('T')[0];
-
 const parseDate = (dateString: string | null): Date | null => {
     if (!dateString) return null;
-    const [month, day, year] = dateString.split('-').map(Number);
-    if (isNaN(month) || isNaN(day) || isNaN(year)) {
+    const [day, month, year] = dateString.split('/').map(Number);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
         console.warn(`Invalid date format: ${dateString}`);
         return null;
     }

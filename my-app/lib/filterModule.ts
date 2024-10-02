@@ -78,19 +78,17 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         } else {
             car.image = null;
         }
-        
-        // TODO: establish a proper date format
-        var carDate = null;
+
+        // Parse the date in "dd/mm/yy" format
+        let carDate = null;
         if (car?.date_listed) {
-            var [month, day, year] = car?.date_listed?.split('-').map(Number);
-            if (year?.toString().length == 2) {
-                year = year + 2000;
+            const [day, month, year] = car.date_listed.split('/').map(Number);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                const fullYear = year + 2000; // Assuming all years are in the 2000s
+                carDate = new Date(fullYear, month - 1, day); // month is 0-indexed in JavaScript Date
             }
+        }   
 
-            carDate = new Date(year, month, day);
-        }
-
-        carDate = carDate;
         const isInTimeRange = carDate && filters.startDate && filters.endDate
         ? carDate >= filters.startDate && carDate <= filters.endDate
         : true;
