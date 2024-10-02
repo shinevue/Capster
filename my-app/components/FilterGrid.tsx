@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 import '../styles/FilterGrid.css';
+import { capitalizeWords } from '@/lib/utils';
 
 interface FilterGridProps {
     data: CarData[];
@@ -39,7 +40,7 @@ const mileageRanges = [
 
 export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, onApplyFilters, includedFilters }) => {
     const uniqueOptions = (key: keyof CarData) => {
-        return Array.from(new Set(data.map(item => item[key])))
+        return Array.from(new Set(data?.map(item => item[key])))
             .filter(Boolean)
             .sort((a, b) => (a && b ? a.toString().localeCompare(b.toString()) : 0));
     };
@@ -103,7 +104,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                                             key={option.value?.toString() || option}
                                             value={option.value?.toString() || option}
                                         >
-                                            {option.label || option}
+                                            {capitalizeWords(option.label || option)}
                                         </SelectItem>
                                     ))}
                                 </SelectGroup>
