@@ -12,9 +12,7 @@ import {
     SortingState,
     getFilteredRowModel,
     ColumnFiltersState,
-    RowData,
 } from "@tanstack/react-table";
-import { useVirtual } from 'react-virtual';
 import {
     Table,
     TableBody,
