@@ -22,6 +22,7 @@ interface FilterGridProps {
     data: CarData[];
     currentFilters: Filters;
     handleFilterChange: (filters: Filters) => void;
+    handleSubmit: () => void;
     includedFilters: (keyof Filters)[];
     isLoading: boolean;
     uniqueFilterValues: {
@@ -30,7 +31,6 @@ interface FilterGridProps {
         trim: string[],
         year: number[];
     };
-    handleSubmit: () => void;
 }
 
 const colorOptions = ['Black', 'White', 'Gray', 'Silver', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Brown', 'Purple', 'Pink', 'Beige', 'Gold'];
@@ -47,7 +47,7 @@ const mileageRanges = [
     { value: Infinity, label: "Any mileage" },
 ];
 
-export function FilterGrid({ data, currentFilters, handleFilterChange, includedFilters, isLoading, uniqueFilterValues, handleSubmit }: FilterGridProps) {
+export function FilterGrid({ data, currentFilters, handleFilterChange, handleSubmit, includedFilters, isLoading, uniqueFilterValues }: FilterGridProps) {
     const uniqueOptions = (key: keyof CarData) => {
         return Array.from(new Set(data?.map(item => item[key])))
             .filter(Boolean)

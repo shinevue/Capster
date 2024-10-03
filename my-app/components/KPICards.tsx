@@ -49,14 +49,14 @@ const KPICards: FC<KPICardsProps> = ({ kpiComparison, hasMore }) => {
             />
             <KPICard
                 title="Avg Days on Market"
-                value={current.averageDaysOnMarket.toFixed(1)}
+                value={current?.averageDaysOnMarket?.toFixed(1) || 'N/A'}
                 valueColor="purple"
                 changeText={getChangeText(changes.averageDaysOnMarket, true)}
                 hasMore={hasMore}
             />
             <KPICard
                 title="Average Price"
-                value={formatCurrency(current.averagePrice)}
+                value={formatCurrency(current?.averagePrice || 0)}
                 valueColor="yellow"
                 changeText={getChangeText(changes.averagePrice)}
                 hasMore={hasMore}

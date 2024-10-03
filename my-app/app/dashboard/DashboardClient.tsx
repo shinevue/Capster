@@ -14,6 +14,7 @@ import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
 import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
+import { motion } from 'framer-motion';
 
 export default function DashboardClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
@@ -25,8 +26,29 @@ export default function DashboardClient() {
         }
     }, [user, isAuthLoading, router]);
 
+    const default_kpiComparison = {
+        "current": {
+            "percentageChange": 0,
+            "totalListings": 0,
+            "averageDaysOnMarket": 0,
+            "averagePrice": 0
+        },
+        "previous": {
+            "percentageChange": 0,
+            "totalListings": 0,
+            "averageDaysOnMarket": 0,
+            "averagePrice": 0
+        },
+        "changes": {
+            "percentageChange": 0,
+            "totalListings": 0,
+            "averageDaysOnMarket": 0,
+            "averagePrice": 0
+        }
+    };
+
     const [filters, setFilters] = useState<Filters>(initialFilters);
-    const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(null);
+    const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(default_kpiComparison);
     const [preloadedImages, setPreloadedImages] = useState<{ [key: string]: string; }>({});
     const [carData, setCarData] = useState<CarData[]>([]);
     const [searchParams, setSearchParams] = useState({
@@ -42,7 +64,6 @@ export default function DashboardClient() {
         trim: [],
         year: [],
     });
-
 
     const handleTimeFilterChange = (newPeriod: 'day' | 'week' | 'month' | null, newPeriodCount: number | null) => {
         const endDate = new Date();
@@ -73,7 +94,6 @@ export default function DashboardClient() {
         // Initialize with the default option (Last week)
         handleTimeFilterChange(filters?.period, filters?.periodCount);
     }, []);
-
 
     useEffect(() => {
         async function loadInitialUniqueFilterValues() {
@@ -140,10 +160,9 @@ export default function DashboardClient() {
             const previousPeriodData = applyFiltersToData(carData, { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
             const previousKPIs = calculateKPIs(previousPeriodData);
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
-
             setKpiComparison(comparison);
         } else {
-            setKpiComparison(null);
+            setKpiComparison(default_kpiComparison);
         }
 
         // Preload images for the filtered data
@@ -163,17 +182,33 @@ export default function DashboardClient() {
         handleSearch(newFilters);
     };
 
+    const handleResetFilters = useCallback(() => {
+        setFilters(initialFilters);
+        setCarData([]);
+        // updateUniqueFilterValues(initialFilters);
+    }, []);
+
     return (
         <DashboardLayout>
-            <FilterGrid
-                data={filteredData}
-                currentFilters={filters}
-                handleFilterChange={handleFilterChange}
-                handleSubmit={handleSubmit}
-                includedFilters={topFilters}
-                isLoading={isLoading}
-                uniqueFilterValues={uniqueFilterValues}
-            />
+            <div className="flex justify-between items-center mb-4">
+                <FilterGrid
+                    data={filteredData}
+                    currentFilters={filters}
+                    handleFilterChange={handleFilterChange}
+                    handleSubmit={handleSubmit}
+                    includedFilters={topFilters}
+                    isLoading={isLoading}
+                    uniqueFilterValues={uniqueFilterValues}
+                />
+                <motion.button
+                    className="reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleResetFilters}
+                >
+                    Reset Filters
+                </motion.button>
+            </div>
 
             <div className="mt-5 mb-10">
                 {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}

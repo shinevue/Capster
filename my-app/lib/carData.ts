@@ -14,8 +14,6 @@ function convertToLowerCase(obj: any): any {
 }
 
 export async function fetchCarDataByFilters(make: string, model: string, trim: string, year: number | null): Promise<CarData[]> {
-    console.log('Starting fetchCarDataByFilters with filters:', { make, model, trim, year });
-
     let query = supabase
         .from('processed_bot_listings')
         .select('*', { count: 'exact' })
@@ -42,23 +40,18 @@ export async function fetchCarDataByFilters(make: string, model: string, trim: s
         throw countError
     }
 
-    console.log('Total count:', count);
-
     if (!count) {
-        console.log('No results found, returning empty array');
         return [];
     }
 
     // Calculate the number of pages
     const totalPages = Math.ceil(count / pageSize);
-    console.log('Total pages:', totalPages);
 
     // Create an array of page numbers
     const pages = Array.from({ length: totalPages }, (_, i) => i);
 
     // Function to fetch a single page
     const fetchPage = async (page: number): Promise<CarData[]> => {
-        console.log(`Fetching page ${page + 1} of ${totalPages}`);
         const { data, error } = await query
             .range(page * pageSize, (page + 1) * pageSize - 1)
             .order('id', { ascending: true });
@@ -68,22 +61,18 @@ export async function fetchCarDataByFilters(make: string, model: string, trim: s
             throw error
         }
 
-        console.log(`Received ${data?.length || 0} results for page ${page + 1}`);
         return (data as CarData[] || []).map(convertToLowerCase);
     }
 
     // Fetch data in parallel
     const allData: CarData[] = [];
     for (let i = 0; i < totalPages; i += parallelFetchCount) {
-        console.log(`Starting parallel fetch for pages ${i + 1} to ${Math.min(i + parallelFetchCount, totalPages)}`);
         const pagePromises = pages.slice(i, i + parallelFetchCount).map(fetchPage);
         const results = await Promise.all(pagePromises);
         const flatResults = results.flat();
-        console.log(`Received ${flatResults.length} results in this batch`);
         allData.push(...flatResults);
     }
 
-    console.log(`Fetched a total of ${allData.length} results`);
     return allData;
 }
 
@@ -112,8 +101,6 @@ export async function fetchFilteredUniqueValues(filters: Partial<{ make: string 
         .from('processed_bot_listings')
         .select('make, model, trim, year')
 
-    console.log("filters", filters)
-
     if (filters.make) {
         query = query.ilike('make', `${filters.make}`)
     }
@@ -127,11 +114,7 @@ export async function fetchFilteredUniqueValues(filters: Partial<{ make: string 
         query = query.eq('year', filters.year)
     }
 
-    console.log("query", query)
-
     const { data, error } = await query
-
-    console.log("data", data)
 
     if (error) {
         console.error('Error fetching filtered unique values:', error)
@@ -144,8 +127,6 @@ export async function fetchFilteredUniqueValues(filters: Partial<{ make: string 
         trim: Array.from(new Set(data.map(item => item.trim).filter(Boolean))).sort(),
         year: Array.from(new Set(data.map(item => item.year).filter(Boolean))).sort((a, b) => b - a),
     }
-
-    console.log("uniqueValues", uniqueValues)
 
     return uniqueValues
 }
