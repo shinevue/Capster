@@ -190,7 +190,7 @@ export default function DashboardClient() {
 
     return (
         <DashboardLayout>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex md:flex-row flex-col justify-between items-center mb-4">
                 <FilterGrid
                     data={filteredData}
                     currentFilters={filters}
