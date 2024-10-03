@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 
 import '../styles/FilterGrid.css';
 import { capitalizeWords } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface FilterGridProps {
     data: CarData[];
@@ -121,13 +122,17 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, includedF
                     </div>
                 );
             })}
-            {handleSubmit && <button
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-            >
-                {isLoading ? 'Searching...' : 'Search'}
-            </button>}
+            {handleSubmit &&
+                <motion.button
+                    className="flex items-center space-x-2 bg-primary text-primary-foreground px-5 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Filtering...' : 'Apply Filters'}
+                </motion.button>
+            }
         </div>
     );
 }
