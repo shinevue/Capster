@@ -20,7 +20,7 @@ export async function fetchCarDataByFilters(
     year: number[] | null
 ): Promise<CarData[]> {
     let query = supabase
-        .from('processed_bot_listings')
+        .from('processed_bot_listings_duplicate')
         .select('*', { count: 'exact' })
 
     if (make && make.length > 0) {
