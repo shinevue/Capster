@@ -103,17 +103,17 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
 
         const matchesListingType = (car: CarData, listingType: string[] | null): boolean => {
             if (!listingType || listingType.length === 0) return true;
-            return listingType.includes(car?.listing_type);
+            return listingType.includes(car?.listing_type || '');
         };
 
         const matchesTransmission = (car: CarData, transmission: string[] | null): boolean => {
             if (!transmission || transmission.length === 0) return true;
-            return transmission.includes(car?.transmission);
+            return transmission.includes(car?.transmission || '');
         };
 
         const matchesDrivetrain = (car: CarData, drivetrain: string[] | null): boolean => {
             if (!drivetrain || drivetrain.length === 0) return true;
-            return drivetrain.includes(car?.drivetrain);
+            return drivetrain.includes(car?.drivetrain || '');
         };
 
         const matchesMake = !filters.make || filters.make.length === 0 || 
@@ -124,7 +124,7 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             (car.trim && filters.trim.some((trim: string) => car.trim?.toLowerCase() === trim.toLowerCase()));
         const matchesYear = (car: CarData, years: number[] | null): boolean => {
             if (!years || years.length === 0) return true;
-            return years.includes(car.year);
+            return years.includes(parseInt(car.year));
         };
 
         return (
@@ -132,12 +132,12 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             matchesModel &&
             matchesTrim &&
             (!filters.mileage || (car.mileage !== null && car.mileage <= filters?.mileage)) &&
-            matchesColor(car.exterior_color, filters.exteriorColor) &&
-            matchesColor(car.interior_color, filters.interiorColor) &&
-            matchesTransmission(car, filters.transmission) &&
-            matchesDrivetrain(car, filters.drivetrain) &&
-            matchesListingType(car, filters.listingType) &&
-            matchesYear(car, filters.year) &&
+            matchesColor(car.exterior_color, filters.exteriorColor || []) &&
+            matchesColor(car.interior_color, filters.interiorColor || []) &&
+            matchesTransmission(car, filters.transmission || []) &&
+            matchesDrivetrain(car, filters.drivetrain || []) &&
+            matchesListingType(car, filters.listingType || []) &&
+            matchesYear(car, filters.year || []) &&
             isInTimeRange
         );
     });
