@@ -5,8 +5,8 @@ export const initialFilters: Filters = {
     model: [],
     trim: [],
     mileage: null,
-    exteriorColor: null,
-    interiorColor: null,
+    exteriorColor: [],
+    interiorColor: [],
     transmission: null,
     drivetrain: null,
     period: 'day',
@@ -98,35 +98,47 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             return false;
         }
 
-        const matchesColor = (carColor: string | null, filterColor: string | null) =>
-            !filterColor || (carColor && carColor.toLowerCase().includes(filterColor.toLowerCase()));
+        const matchesColor = (carColor: string | null, filterColors: string[]) =>
+            !filterColors?.length || (carColor && filterColors.some(color => carColor.toLowerCase().includes(color.toLowerCase())));
 
-        const matchesListingType = !filters.listingType || car.listing_type === filters.listingType;
+        const matchesListingType = (car: CarData, listingType: string[] | null): boolean => {
+            if (!listingType || listingType.length === 0) return true;
+            return listingType.includes(car?.listing_type);
+        };
 
-        const matchesTransmission = !filters.transmission ||
-            (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));
+        const matchesTransmission = (car: CarData, transmission: string[] | null): boolean => {
+            if (!transmission || transmission.length === 0) return true;
+            return transmission.includes(car?.transmission);
+        };
+
+        const matchesDrivetrain = (car: CarData, drivetrain: string[] | null): boolean => {
+            if (!drivetrain || drivetrain.length === 0) return true;
+            return drivetrain.includes(car?.drivetrain);
+        };
 
         const matchesMake = !filters.make || filters.make.length === 0 || 
-            (car.make && filters.make.some(make => car.make.toLowerCase() === make.toLowerCase()));
+            (car.make && filters.make.some((make: string) => car.make?.toLowerCase() === make.toLowerCase()));
         const matchesModel = !filters.model || filters.model.length === 0 || 
-            (car.model && filters.model.some(model => car.model.toLowerCase() === model.toLowerCase()));
+            (car.model && filters.model.some((model: string) => car.model?.toLowerCase() === model.toLowerCase()));
         const matchesTrim = !filters.trim || filters.trim.length === 0 || 
-            (car.trim && filters.trim.some(trim => car.trim.toLowerCase() === trim.toLowerCase()));
-        const matchesYear = !filters.year || filters.year.length === 0 || 
-            (car.year && filters.year.includes(car.year));
+            (car.trim && filters.trim.some((trim: string) => car.trim?.toLowerCase() === trim.toLowerCase()));
+        const matchesYear = (car: CarData, years: number[] | null): boolean => {
+            if (!years || years.length === 0) return true;
+            return years.includes(car.year);
+        };
 
         return (
             matchesMake &&
             matchesModel &&
             matchesTrim &&
-            (!filters.mileage || (car.mileage !== null && car.mileage <= filters.mileage)) &&
+            (!filters.mileage || (car.mileage !== null && car.mileage <= filters?.mileage)) &&
             matchesColor(car.exterior_color, filters.exteriorColor) &&
             matchesColor(car.interior_color, filters.interiorColor) &&
-            matchesTransmission &&
-            (!filters.drivetrain || car.drivetrain === filters.drivetrain) &&
-            matchesListingType &&
-            isInTimeRange &&
-            matchesYear
+            matchesTransmission(car, filters.transmission) &&
+            matchesDrivetrain(car, filters.drivetrain) &&
+            matchesListingType(car, filters.listingType) &&
+            matchesYear(car, filters.year) &&
+            isInTimeRange
         );
     });
 };

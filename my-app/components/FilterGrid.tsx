@@ -49,16 +49,35 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
     };
 
     const handleFilterChangeLocal = (key: keyof Filters, value: any) => {
-        handleFilterChange({ ...currentFilters, [key]: value.length === 0 ? null : value });
+        if (key === 'mileage') {
+            const mileageValue = value !== null ? parseInt(value) : null;
+            handleFilterChange({ ...currentFilters, [key]: mileageValue });
+        } else {
+            handleFilterChange({ ...currentFilters, [key]: value.length === 0 ? null : value });
+        }
     };
 
     const handleSelectionChange = (key: keyof Filters, keys: any) => {
-        setTempSelectedValues(prev => ({ ...prev, [key]: Array.from(keys) }));
+        let newValue;
+        if (key === 'mileage') {
+            // Cast the first element to string before parsing
+            newValue = keys.size > 0 ? parseInt(Array.from(keys)[0] as string) : null;
+        } else {
+            newValue = Array.from(keys);
+        }
+        setTempSelectedValues(prev => ({ ...prev, [key]: newValue }));
+
+        // Immediately apply the change for mileage
+        if (key === 'mileage') {
+            handleFilterChangeLocal(key, newValue);
+        }
     };
 
     const handleClose = (key: keyof Filters) => {
         if (tempSelectedValues[key] !== undefined) {
-            handleFilterChangeLocal(key, tempSelectedValues[key]);
+            if (key !== 'mileage') {
+                handleFilterChangeLocal(key, tempSelectedValues[key]);
+            }
             setTempSelectedValues(prev => ({ ...prev, [key]: undefined }));
         }
     };
@@ -101,19 +120,31 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
                 }
 
                 return (
-                    <div key={key} className="flex-grow max-w-xs space-y-2 mr-4">
+                    <div key={key} className="flex-grow space-y-2 mr-4">
                         <Select
                             variant={"bordered"}
                             label={config.label}
-                            selectionMode="multiple"
-                            selectedKeys={tempSelectedValues[key as keyof Filters] || []}
+                            selectionMode={key === 'mileage' ? "single" : "multiple"}
+                            selectedKeys={key === 'mileage'
+                                ? (tempSelectedValues[key as keyof Filters] !== undefined
+                                    ? [tempSelectedValues[key as keyof Filters]?.toString()]
+                                    : currentFilters[key as keyof Filters]
+                                        ? [currentFilters[key as keyof Filters]?.toString()]
+                                        : [])
+                                : (tempSelectedValues[key as keyof Filters] || currentFilters[key as keyof Filters] || [])
+                            }
                             onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
                             onClose={() => handleClose(key as keyof Filters)}
-                            className="w-[250px] h-[40px]"
+                            className="w-full min-w-[250px] max-w-[300px]"
+                            popoverProps={{
+                                classNames: {
+                                    content: "min-w-[250px] max-w-[300px]"
+                                }
+                            }}
                         >
                             {config.options.map((option) => (
-                                <SelectItem key={option.value?.toString() || option} value={option.value?.toString() || option} className="py-2">
-                                    {capitalizeWords(option.label || option)}
+                                <SelectItem key={key === 'mileage' ? option.value.toString() : option.toString()} value={key === 'mileage' ? option.value.toString() : option.toString()} className="py-2">
+                                    {key === 'mileage' ? option.label : capitalizeWords(option.toString())}
                                 </SelectItem>
                             ))}
                         </Select>
