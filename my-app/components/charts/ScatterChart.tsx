@@ -106,7 +106,7 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     if (!isDataSuitable) {
         return (
             <div className="flex items-center justify-center h-[200px] bg-gray-100 rounded-lg">
-                <p className="text-gray-300 text-4xl">
+                <p className="text-gray-300 text-2xl">
                     Not enough data to display the scatter plot. Please adjust your filters.
                 </p>
             </div>
