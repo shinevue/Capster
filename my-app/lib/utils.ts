@@ -17,3 +17,7 @@ export const formatCurrency = (value: number): string => {
 export const formatNumber = (value: number): string => {
   return new Intl.NumberFormat('en-US').format(value)
 }
+
+export function capitalizeWords(str: string): string {
+  return str.replace(/\b\w/g, char => char.toUpperCase());
+}

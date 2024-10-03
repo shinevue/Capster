@@ -5,6 +5,7 @@ import { AuthProvider } from './providers/AuthProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import '@radix-ui/themes/styles.css';
+import { NextUIProvider } from "@nextui-org/react";
 
 export const metadata: Metadata = {
   title: 'Car Sales Dashboard',
@@ -25,11 +26,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <Header />
-            {children}
-            <Footer />
-          </AuthProvider>
+          <NextUIProvider>
+            <AuthProvider>
+              <Header />
+              {children}
+              <Footer />
+            </AuthProvider>
+          </NextUIProvider>
         </ThemeProvider>
       </body>
     </html>

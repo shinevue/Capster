@@ -1,15 +1,20 @@
 import { FC } from 'react';
-import { Card, Flex, Text, Box } from '@radix-ui/themes';
+import { Card, Flex, Text, Box, Spinner } from '@radix-ui/themes';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { ArrowUpIcon, ArrowDownIcon } from '@radix-ui/react-icons';
 import { KPIComparison } from '@/lib/chartTransformers';
 
 interface KPICardsProps {
     kpiComparison: KPIComparison;
+    hasMore: boolean;
 }
 
-const KPICards: FC<KPICardsProps> = ({ kpiComparison }) => {
+const KPICards: FC<KPICardsProps> = ({ kpiComparison, hasMore }) => {
     const { current, changes } = kpiComparison;
+
+    if (!current || !changes) {
+        return null;
+    }
 
     const formatChange = (change: number, isInverse: boolean = false) => {
         const prefix = isInverse ? (change >= 0 ? '-' : '+') : (change >= 0 ? '+' : '-');
@@ -33,24 +38,28 @@ const KPICards: FC<KPICardsProps> = ({ kpiComparison }) => {
                 }
                 valueColor={current.percentageChange >= 0 ? "green" : "red"}
                 changeText={getChangeText(changes.percentageChange)}
+                hasMore={hasMore}
             />
             <KPICard
                 title="Total Listings"
                 value={formatNumber(current.totalListings)}
                 valueColor="blue"
                 changeText={getChangeText(changes.totalListings)}
+                hasMore={hasMore}
             />
             <KPICard
                 title="Avg Days on Market"
-                value={current.averageDaysOnMarket.toFixed(1)}
+                value={current?.averageDaysOnMarket?.toFixed(1) || 'N/A'}
                 valueColor="purple"
                 changeText={getChangeText(changes.averageDaysOnMarket, true)}
+                hasMore={hasMore}
             />
             <KPICard
                 title="Average Price"
-                value={formatCurrency(current.averagePrice)}
+                value={formatCurrency(current?.averagePrice || 0)}
                 valueColor="yellow"
                 changeText={getChangeText(changes.averagePrice)}
+                hasMore={hasMore}
             />
         </Flex>
     );
@@ -62,10 +71,16 @@ interface KPICardProps {
     icon?: React.ReactNode;
     valueColor?: string;
     changeText: string;
+    hasMore: boolean;
 }
 
-const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText }) => (
-    <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md">
+const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText, hasMore }) => (
+    <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md relative">
+        {hasMore && (
+            <div className="absolute top-3.5 right-3.5">
+                <Spinner size="1" />
+            </div>
+        )}
         <Flex direction="column" gap="1" className='px-4'>
             <Text size="2" weight="bold" color="gray">
                 {title}

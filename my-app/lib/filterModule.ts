@@ -1,12 +1,12 @@
 import { Filters, CarData } from '@/types/CarData';
 
 export const initialFilters: Filters = {
-    make: null,
-    model: null,
-    trim: null,
+    make: [],
+    model: [],
+    trim: [],
     mileage: null,
-    exteriorColor: null,
-    interiorColor: null,
+    exteriorColor: [],
+    interiorColor: [],
     transmission: null,
     drivetrain: null,
     period: 'day',
@@ -15,7 +15,7 @@ export const initialFilters: Filters = {
     endDate: null,
     listingType: null,
     onlyWithPricing: true, // Add this new filter
-    year: null,
+    year: [],
 };
 
 export const applyTimeFilter = (filters: Filters): Filters => {
@@ -78,19 +78,17 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         } else {
             car.image = null;
         }
-        
-        // TODO: establish a proper date format
-        var carDate = null;
+
+        // Parse the date in "dd/mm/yy" format
+        let carDate = null;
         if (car?.date_listed) {
-            var [month, day, year] = car?.date_listed?.split('-').map(Number);
-            if (year?.toString().length == 2) {
-                year = year + 2000;
+            const [day, month, year] = car.date_listed.split('/').map(Number);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                const fullYear = year + 2000; // Assuming all years are in the 2000s
+                carDate = new Date(fullYear, month - 1, day); // month is 0-indexed in JavaScript Date
             }
+        }   
 
-            carDate = new Date(year, month, day);
-        }
-
-        carDate = carDate;
         const isInTimeRange = carDate && filters.startDate && filters.endDate
         ? carDate >= filters.startDate && carDate <= filters.endDate
         : true;
@@ -100,24 +98,47 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             return false;
         }
 
-        const matchesColor = (carColor: string | null, filterColor: string | null) =>
-            !filterColor || (carColor && carColor.toLowerCase().includes(filterColor.toLowerCase()));
+        const matchesColor = (carColor: string | null, filterColors: string[]) =>
+            !filterColors?.length || (carColor && filterColors.some(color => carColor.toLowerCase().includes(color.toLowerCase())));
 
-        const matchesListingType = !filters.listingType || car.listing_type === filters.listingType;
+        const matchesListingType = (car: CarData, listingType: string[] | null): boolean => {
+            if (!listingType || listingType.length === 0) return true;
+            return listingType.includes(car?.listing_type || '');
+        };
 
-        const matchesTransmission = !filters.transmission ||
-            (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));
+        const matchesTransmission = (car: CarData, transmission: string[] | null): boolean => {
+            if (!transmission || transmission.length === 0) return true;
+            return transmission.includes(car?.transmission || '');
+        };
+
+        const matchesDrivetrain = (car: CarData, drivetrain: string[] | null): boolean => {
+            if (!drivetrain || drivetrain.length === 0) return true;
+            return drivetrain.includes(car?.drivetrain || '');
+        };
+
+        const matchesMake = !filters.make || filters.make.length === 0 || 
+            (car.make && filters.make.some((make: string) => car.make?.toLowerCase() === make.toLowerCase()));
+        const matchesModel = !filters.model || filters.model.length === 0 || 
+            (car.model && filters.model.some((model: string) => car.model?.toLowerCase() === model.toLowerCase()));
+        const matchesTrim = !filters.trim || filters.trim.length === 0 || 
+            (car.trim && filters.trim.some((trim: string) => car.trim?.toLowerCase() === trim.toLowerCase()));
+        const matchesYear = (car: CarData, years: number[] | null): boolean => {
+            if (!years || years.length === 0) return true;
+            return years.includes(parseInt(car.year));
+        };
 
         return (
-            (!filters.trim || car.trim === filters.trim) &&
-            (!filters.mileage || (car.mileage !== null && car.mileage <= filters.mileage)) &&
-            matchesColor(car.exterior_color, filters.exteriorColor) &&
-            matchesColor(car.interior_color, filters.interiorColor) &&
-            matchesTransmission &&
-            (!filters.drivetrain || car.drivetrain === filters.drivetrain) &&
-            matchesListingType &&
-            isInTimeRange &&
-            (!filters.year || car.year === filters.year)
+            matchesMake &&
+            matchesModel &&
+            matchesTrim &&
+            (!filters.mileage || (car.mileage !== null && car.mileage <= filters?.mileage)) &&
+            matchesColor(car.exterior_color, filters.exteriorColor || []) &&
+            matchesColor(car.interior_color, filters.interiorColor || []) &&
+            matchesTransmission(car, filters.transmission || []) &&
+            matchesDrivetrain(car, filters.drivetrain || []) &&
+            matchesListingType(car, filters.listingType || []) &&
+            matchesYear(car, filters.year || []) &&
+            isInTimeRange
         );
     });
 };

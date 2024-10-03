@@ -4,7 +4,11 @@ export const calculateKPIs = (data: CarData[]): KPIData => {
     const validPriceData = data.filter(car => car.price !== null && car.price > 0);
     const totalListings = validPriceData.length;
     const totalPrice = validPriceData.reduce((sum, car) => sum + (car.price || 0), 0);
-    const averagePrice = totalPrice / totalListings;
+
+    var averagePrice = 0;
+    if (totalListings > 0) {
+        averagePrice = totalPrice / totalListings;
+    }
 
     const now = new Date();
     const totalDaysOnMarket = validPriceData.reduce((sum, car) => {
@@ -15,7 +19,10 @@ export const calculateKPIs = (data: CarData[]): KPIData => {
         }
         return sum;
     }, 0);
-    const averageDaysOnMarket = totalDaysOnMarket / totalListings;
+    var averageDaysOnMarket = 0;
+    if (totalListings > 0) {
+        averageDaysOnMarket = totalDaysOnMarket / totalListings;
+    }
 
     // Calculate percentage change using linear regression
     let percentageChange = 0;

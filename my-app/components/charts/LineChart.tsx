@@ -17,12 +17,10 @@ interface LineChartComponentProps {
     endDate: Date | null;
 }
 
-const formatDate = (date: Date): string => date.toISOString().split('T')[0];
-
 const parseDate = (dateString: string | null): Date | null => {
     if (!dateString) return null;
-    const [month, day, year] = dateString.split('-').map(Number);
-    if (isNaN(month) || isNaN(day) || isNaN(year)) {
+    const [day, month, year] = dateString.split('/').map(Number);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
         console.warn(`Invalid date format: ${dateString}`);
         return null;
     }
@@ -167,7 +165,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
     if (!isDataSuitable) {
         return (
             <div className="flex items-center justify-center h-[200px] bg-gray-100 rounded-lg">
-                <p className="text-gray-300 text-4xl">
+                <p className="text-gray-300 text-2xl">
                     Not enough data to display the chart. Please adjust your filters.
                 </p>
             </div>

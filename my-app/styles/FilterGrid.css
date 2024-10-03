@@ -1,30 +1,16 @@
-@media (max-width: 767px) {
-    button[role='combobox'] {
-        /* height: 70px !important; */
-        padding: 0 1rem !important;
+li[role="option"] {
+    height: 30px;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 0;
+}
+
+div[data-slot="content"] {
+    padding: 1rem;
+}
+
+/* mobile */
+@media (max-width: 768px) {
+    li[role="option"] {
+        height: 50px;
     }
-
-    div[role="option"] {
-        height: 40px !important;
-        border-bottom: 1px solid #e0e0e042 !important;
-        border-radius: 0px !important;
-    }
-}
-  
-button[role='combobox'] {
-  font-weight: bold !important;
-  height: 40px !important;
-  border-radius: 1rem !important;
-}
-
-.rt-SelectTriggerInner {
-    margin-right: 4rem !important;
-}
-
-button[role="switch"] {
-    background-color: #000 !important;
-}
-
-span[data-state] {
-    background-color: #fff !important;
 }

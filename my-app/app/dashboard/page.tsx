@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { FilterSection } from "@/components/dashboard/FilterSection";
 import { ChartSection } from "@/components/dashboard/ChartSection";
 import { DataTableSection } from "@/components/dashboard/DataTableSection";
-import defaultData from "@/data/data.json";
 import KPICards from "@/components/KPICards";
 import { CarData, Filters } from '@/types/CarData';
 import { initialFilters, applyFiltersToData } from '@/lib/filterModule';
@@ -14,20 +13,51 @@ import { preloadImages } from '@/lib/imageLoader';
 import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
+import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
+import { motion } from 'framer-motion';
 
 export default function Dashboard() {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading: isAuthLoading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        if (!isLoading && !user) {
+        if (!isAuthLoading && !user) {
             // router.push("/login");
         }
-    }, [user, isLoading, router]);
+    }, [user, isAuthLoading, router]);
+
+    const default_kpiComparison = {
+        "current": {
+            "percentageChange": 0,
+            "totalListings": 0,
+            "averageDaysOnMarket": 0,
+            "averagePrice": 0
+        },
+        "previous": {
+            "percentageChange": 0,
+            "totalListings": 0,
+            "averageDaysOnMarket": 0,
+            "averagePrice": 0
+        },
+        "changes": {
+            "percentageChange": 0,
+            "totalListings": 0,
+            "averageDaysOnMarket": 0,
+            "averagePrice": 0
+        }
+    };
 
     const [filters, setFilters] = useState<Filters>(initialFilters);
-    const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(null);
+    const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(default_kpiComparison);
     const [preloadedImages, setPreloadedImages] = useState<{ [key: string]: string; }>({});
+    const [carData, setCarData] = useState<CarData[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [uniqueFilterValues, setUniqueFilterValues] = useState<{ make: string[], model: string[], trim: string[], year: number[]; }>({
+        make: [],
+        model: [],
+        trim: [],
+        year: [],
+    });
 
     const handleTimeFilterChange = (newPeriod: 'day' | 'week' | 'month' | null, newPeriodCount: number | null) => {
         const endDate = new Date();
@@ -54,15 +84,67 @@ export default function Dashboard() {
         }));
     };
 
+    async function loadInitialUniqueFilterValues() {
+        try {
+            const values = await fetchUniqueFilterValues();
+            setUniqueFilterValues(values);
+        } catch (error) {
+            console.error('Error loading initial unique filter values:', error);
+        }
+    }
+
     useEffect(() => {
         // Initialize with the default option (Last week)
         handleTimeFilterChange(filters?.period, filters?.periodCount);
     }, []);
 
+    useEffect(() => {
+        loadInitialUniqueFilterValues();
+    }, []);
+
+    const handleSearch = async (newFilters: Filters) => {
+        setIsLoading(true);
+        try {
+            const { make, model, trim, year } = newFilters;
+
+            const data = await fetchCarDataByFilters(
+                make ? make : null,
+                model ? model : null,
+                trim ? trim : null,
+                year ? year.map(y => parseInt(y.toString())) : null
+            );
+            setCarData(data);
+            setFilters(newFilters);
+        } catch (error) {
+            console.error('Error fetching car data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const updateUniqueFilterValues = async (currentFilters: Filters) => {
+        try {
+            const values = await fetchFilteredUniqueValues({
+                make: currentFilters.make || [],
+                model: currentFilters.model || [],
+                trim: currentFilters.trim || [],
+                year: currentFilters?.year ? currentFilters.year.map(y => parseInt(y.toString())) : [],
+            });
+            setUniqueFilterValues(values);
+        } catch (error) {
+            console.error('Error updating unique filter values:', error);
+        }
+    };
+
+    const handleFilterChange = (newFilters: Filters) => {
+        setFilters(newFilters);
+        updateUniqueFilterValues(newFilters);
+    };
+
     const filteredData = useMemo(() => {
-        const filtered = applyFiltersToData(defaultData as unknown as CarData[], filters);
+        const filtered = applyFiltersToData(carData, filters);
         return filtered;
-    }, [filters, defaultData]);
+    }, [filters, carData]);
 
     useEffect(() => {
         const currentKPIs = calculateKPIs(filteredData);
@@ -70,47 +152,74 @@ export default function Dashboard() {
         if (filters.startDate && filters.endDate) {
             const previousPeriodStart = new Date(filters.startDate.getTime() - (filters.endDate.getTime() - filters.startDate.getTime()));
             const previousPeriodEnd = new Date(filters.startDate);
-            const previousPeriodData = applyFiltersToData(defaultData as unknown as CarData[], { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
+            const previousPeriodData = applyFiltersToData(carData, { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
             const previousKPIs = calculateKPIs(previousPeriodData);
-
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
             setKpiComparison(comparison);
         } else {
-            setKpiComparison(null);
+            setKpiComparison(default_kpiComparison);
         }
 
         // Preload images for the filtered data
         preloadImages(filteredData).then(setPreloadedImages);
-    }, [filters, filteredData]);
+    }, [filters, filteredData, carData]);
 
-    const handleApplyFilters = (newFilters: Filters) => {
-        setFilters(newFilters);
-    };
-
-    // Create a memoized image loader function
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
     const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
 
+    const handleSubmit = () => {
+        handleSearch(filters);
+    };
+
+    const handleApplyFilters = (newFilters: Filters) => {
+        handleFilterChange(newFilters);
+        handleSearch(newFilters);
+    };
+
+    const handleResetFilters = useCallback(() => {
+        loadInitialUniqueFilterValues();
+
+        setFilters(initialFilters);
+        setCarData([]);
+        // updateUniqueFilterValues(initialFilters);
+    }, []);
+
     return (
         <DashboardLayout>
-            <FilterGrid
-                data={filteredData}
-                currentFilters={filters}
-                onApplyFilters={handleApplyFilters}
-                includedFilters={topFilters}
-            />
-
-            <div className="mt-5 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} />}
+            <div className="flex md:flex-row flex-col justify-between align-center items-center mb-4">
+                <FilterGrid
+                    data={filteredData}
+                    currentFilters={filters}
+                    handleFilterChange={handleFilterChange}
+                    handleSubmit={handleSubmit}
+                    includedFilters={topFilters}
+                    isLoading={isLoading}
+                    uniqueFilterValues={uniqueFilterValues}
+                />
+                <motion.button
+                    className="reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleResetFilters}
+                >
+                    Reset Filters
+                </motion.button>
             </div>
 
-            <FilterSection
-                filteredData={filteredData}
-                filters={filters}
-                handleApplyFilters={handleApplyFilters}
-                handleTimeFilterChange={handleTimeFilterChange}
-            />
+            <div className="mt-5 mb-10">
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
+            </div>
+
+            <div className='mb-10'>
+                <FilterSection
+                    filteredData={filteredData}
+                    filters={filters}
+                    handleFilterChange={handleFilterChange}
+                    handleApplyFilters={handleApplyFilters}
+                    handleTimeFilterChange={handleTimeFilterChange}
+                />
+            </div>
 
             <ChartSection
                 filteredData={filteredData}
@@ -125,4 +234,4 @@ export default function Dashboard() {
             />
         </DashboardLayout>
     );
-}
+};

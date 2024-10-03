@@ -7,7 +7,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(
+    supabaseUrl, 
+    supabaseAnonKey,
+    {
+        global: {
+          fetch: (url: any, options = {}) => {
+            return fetch(url, { ...options, cache: 'no-store' });
+          }
+        }
+    }
+);
 
 // Add this function to get the current session
 export const getCurrentSession = async () => {

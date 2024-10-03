@@ -19,21 +19,21 @@ export interface CarData {
 }
 
 export interface Filters {
-    make: string | null;
-    model: string | null;
-    trim: string | null;
+    make: string[] | null;
+    model: string[] | null;
+    trim: string[] | null;
     mileage: number | null;
-    exteriorColor: string | null;
-    interiorColor: string | null;
-    transmission: string | null;
-    drivetrain: string | null;
+    exteriorColor: string[] | null;
+    interiorColor: string[] | null;
+    transmission: string[] | null;
+    drivetrain: string[] | null;
     period: 'day' | 'week' | 'month' | null;
     periodCount: number | null;
     startDate: Date | null;
     endDate: Date | null;
-    listingType: string | null;
+    listingType: string[] | null;
     onlyWithPricing: boolean;
-    year: string | null;
+    year: number[] | null;
 }
 
 export interface KPIData {

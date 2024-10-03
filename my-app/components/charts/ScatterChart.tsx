@@ -16,13 +16,14 @@ interface ScatterChartComponentProps {
 
 const parseDate = (dateString: string | null): Date | null => {
     if (!dateString) return null;
-    const [month, day, year] = dateString.split('-').map(Number);
-    if (isNaN(month) || isNaN(day) || isNaN(year)) {
+    const [day, month, year] = dateString.split('/').map(Number);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
         console.warn(`Invalid date format: ${dateString}`);
         return null;
     }
     const fullYear = year < 100 ? 2000 + year : year;
-    return new Date(fullYear, month - 1, day);
+    // Create the date using UTC to avoid timezone issues
+    return new Date(Date.UTC(fullYear, month - 1, day));
 };
 
 const formatPrice = (value: number): string =>
@@ -105,7 +106,7 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     if (!isDataSuitable) {
         return (
             <div className="flex items-center justify-center h-[200px] bg-gray-100 rounded-lg">
-                <p className="text-gray-300 text-4xl">
+                <p className="text-gray-300 text-2xl">
                     Not enough data to display the scatter plot. Please adjust your filters.
                 </p>
             </div>
