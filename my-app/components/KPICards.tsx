@@ -12,6 +12,10 @@ interface KPICardsProps {
 const KPICards: FC<KPICardsProps> = ({ kpiComparison, hasMore }) => {
     const { current, changes } = kpiComparison;
 
+    if (!current || !changes) {
+        return null;
+    }
+
     const formatChange = (change: number, isInverse: boolean = false) => {
         const prefix = isInverse ? (change >= 0 ? '-' : '+') : (change >= 0 ? '+' : '-');
         return `${prefix}${Math.abs(change).toFixed(2)}%`;

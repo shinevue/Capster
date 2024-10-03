@@ -13,13 +13,9 @@ import { preloadImages } from '@/lib/imageLoader';
 import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
-import { fetchAdditionalCarData } from '@/lib/carData';
+import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
 
-interface DashboardClientProps {
-    initialCarData: CarData[];
-}
-
-export default function DashboardClient({ initialCarData }: DashboardClientProps) {
+export default function DashboardClient() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const router = useRouter();
 
@@ -32,44 +28,21 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
     const [filters, setFilters] = useState<Filters>(initialFilters);
     const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(null);
     const [preloadedImages, setPreloadedImages] = useState<{ [key: string]: string; }>({});
-    const [carData, setCarData] = useState<CarData[]>(initialCarData);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const loaderRef = useRef(null);
+    const [carData, setCarData] = useState<CarData[]>([]);
+    const [searchParams, setSearchParams] = useState({
+        make: '',
+        model: '',
+        trim: '',
+        year: '',
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [uniqueFilterValues, setUniqueFilterValues] = useState<{ make: string[], model: string[], trim: string[], year: number[]; }>({
+        make: [],
+        model: [],
+        trim: [],
+        year: [],
+    });
 
-    const fetchMoreData = useCallback(async () => {
-        if (isLoadingMore || !hasMore) return;
-
-        setIsLoadingMore(true);
-        try {
-            const newData = await fetchAdditionalCarData(page);
-            if (newData.length > 0) {
-                setCarData(prevData => [...prevData, ...newData]);
-                setPage(prevPage => prevPage + 1);
-            } else {
-                setHasMore(false);
-            }
-        } catch (error) {
-            console.error('Error fetching additional data:', error);
-            setHasMore(false);
-        } finally {
-            setIsLoadingMore(false);
-        }
-    }, [page, isLoadingMore, hasMore]);
-
-    useEffect(() => {
-        if (hasMore && !isLoadingMore) {
-            fetchMoreData();
-        }
-    }, [fetchMoreData, hasMore, isLoadingMore]);
-
-    useEffect(() => {
-        // Fetch more data when initial data is loaded
-        if (carData.length === initialCarData.length) {
-            fetchMoreData();
-        }
-    }, [carData.length, initialCarData.length, fetchMoreData]);
 
     const handleTimeFilterChange = (newPeriod: 'day' | 'week' | 'month' | null, newPeriodCount: number | null) => {
         const endDate = new Date();
@@ -101,6 +74,58 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
         handleTimeFilterChange(filters?.period, filters?.periodCount);
     }, []);
 
+
+    useEffect(() => {
+        async function loadInitialUniqueFilterValues() {
+            try {
+                const values = await fetchUniqueFilterValues();
+                setUniqueFilterValues(values);
+            } catch (error) {
+                console.error('Error loading initial unique filter values:', error);
+            }
+        }
+
+        loadInitialUniqueFilterValues();
+    }, []);
+
+    const handleSearch = async (newFilters: Filters) => {
+        setIsLoading(true);
+        try {
+            const { make, model, trim, year } = newFilters;
+            const data = await fetchCarDataByFilters(
+                make || '',
+                model || '',
+                trim || '',
+                year ? parseInt(year.toString()) : null
+            );
+            setCarData(data);
+            setFilters(newFilters);
+        } catch (error) {
+            console.error('Error fetching car data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const updateUniqueFilterValues = async (currentFilters: Filters) => {
+        try {
+            const values = await fetchFilteredUniqueValues({
+                make: currentFilters.make || null,
+                model: currentFilters.model || null,
+                trim: currentFilters.trim || null,
+                year: currentFilters.year ? parseInt(currentFilters.year.toString()) : null,
+            });
+            setUniqueFilterValues(values);
+        } catch (error) {
+            console.error('Error updating unique filter values:', error);
+        }
+    };
+
+    const handleFilterChange = (newFilters: Filters) => {
+        setFilters(newFilters);
+        updateUniqueFilterValues(newFilters);
+    };
+
     const filteredData = useMemo(() => {
         const filtered = applyFiltersToData(carData, filters);
         return filtered;
@@ -114,7 +139,6 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
             const previousPeriodEnd = new Date(filters.startDate);
             const previousPeriodData = applyFiltersToData(carData, { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
             const previousKPIs = calculateKPIs(previousPeriodData);
-
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
 
             setKpiComparison(comparison);
@@ -126,26 +150,33 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
         preloadImages(filteredData).then(setPreloadedImages);
     }, [filters, filteredData, carData]);
 
-    const handleApplyFilters = (newFilters: Filters) => {
-        setFilters(newFilters);
-    };
-
-    // Create a memoized image loader function
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
     const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
+
+    const handleSubmit = () => {
+        handleSearch(filters);
+    };
+
+    const handleApplyFilters = (newFilters: Filters) => {
+        handleFilterChange(newFilters);
+        handleSearch(newFilters);
+    };
 
     return (
         <DashboardLayout>
             <FilterGrid
                 data={filteredData}
                 currentFilters={filters}
-                onApplyFilters={handleApplyFilters}
+                handleFilterChange={handleFilterChange}
+                handleSubmit={handleSubmit}
                 includedFilters={topFilters}
+                isLoading={isLoading}
+                uniqueFilterValues={uniqueFilterValues}
             />
 
             <div className="mt-5 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={hasMore} />}
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
             </div>
 
             <FilterSection
@@ -166,8 +197,6 @@ export default function DashboardClient({ initialCarData }: DashboardClientProps
                 imageLoader={imageLoader}
                 showDataTable={true}
             />
-
-            {hasMore && <div ref={loaderRef} style={{ height: '20px' }}></div>}
         </DashboardLayout>
     );
-}
+};

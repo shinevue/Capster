@@ -20,8 +20,16 @@ import { capitalizeWords } from '@/lib/utils';
 interface FilterGridProps {
     data: CarData[];
     currentFilters: Filters;
-    onApplyFilters: (filters: Filters) => void;
+    handleFilterChange: (filters: Filters) => void;
     includedFilters: (keyof Filters)[];
+    isLoading: boolean;
+    uniqueFilterValues: {
+        make: string[],
+        model: string[],
+        trim: string[],
+        year: number[];
+    };
+    handleSubmit: () => void;
 }
 
 const colorOptions = ['Black', 'White', 'Gray', 'Silver', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Brown', 'Purple', 'Pink', 'Beige', 'Gold'];
@@ -38,21 +46,21 @@ const mileageRanges = [
     { value: Infinity, label: "Any mileage" },
 ];
 
-export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, onApplyFilters, includedFilters }) => {
+export function FilterGrid({ data, currentFilters, handleFilterChange, includedFilters, isLoading, uniqueFilterValues, handleSubmit }: FilterGridProps) {
     const uniqueOptions = (key: keyof CarData) => {
         return Array.from(new Set(data?.map(item => item[key])))
             .filter(Boolean)
             .sort((a, b) => (a && b ? a.toString().localeCompare(b.toString()) : 0));
     };
 
-    const handleFilterChange = (key: keyof Filters, value: any) => {
-        onApplyFilters({ ...currentFilters, [key]: value === 'all' ? null : value });
+    const handleFilterChangeLocal = (key: keyof Filters, value: any) => {
+        handleFilterChange({ ...currentFilters, [key]: value === 'all' ? null : value });
     };
 
     const filterConfig: Record<keyof Filters, { label: string; options: any[]; }> = {
-        make: { label: 'Make', options: uniqueOptions('make') },
-        model: { label: 'Model', options: uniqueOptions('model') },
-        trim: { label: 'Trim', options: uniqueOptions('trim') },
+        make: { label: 'Make', options: uniqueFilterValues?.make },
+        model: { label: 'Model', options: uniqueFilterValues?.model },
+        trim: { label: 'Trim', options: uniqueFilterValues?.trim },
         mileage: { label: 'Mileage', options: mileageRanges },
         exteriorColor: { label: 'Exterior Color', options: colorOptions },
         interiorColor: { label: 'Interior Color', options: colorOptions },
@@ -64,7 +72,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
         period: { label: 'Period', options: [] }, // Handled separately
         periodCount: { label: 'Period Count', options: [] }, // Handled separately
         onlyWithPricing: { label: 'Only With Pricing', options: [] }, // Handled separately
-        year: { label: 'Year', options: uniqueOptions('year') },
+        year: { label: 'Year', options: uniqueFilterValues?.year },
     };
 
     return (
@@ -77,7 +85,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                         <div key={key} className="flex items-center space-x-2">
                             <Switch
                                 checked={currentFilters.onlyWithPricing}
-                                onCheckedChange={(checked) => handleFilterChange('onlyWithPricing', checked)}
+                                onCheckedChange={(checked) => handleFilterChangeLocal('onlyWithPricing', checked)}
                             />
                             <Label className="text-sm font-medium text-gray-700">
                                 Only With Pricing
@@ -90,7 +98,7 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                     <div key={key} className="flex-grow max-w-xs space-y-2 mr-4">
                         <Select
                             value={(currentFilters[key as keyof Filters] as string) || 'all'}
-                            onValueChange={(value) => handleFilterChange(key as keyof Filters, value)}
+                            onValueChange={(value) => handleFilterChangeLocal(key as keyof Filters, value)}
                         >
                             <SelectTrigger className="w-[250px]">
                                 <SelectValue placeholder={`Select ${config.label}`} />
@@ -113,6 +121,13 @@ export const FilterGrid: React.FC<FilterGridProps> = ({ data, currentFilters, on
                     </div>
                 );
             })}
+            {handleSubmit && <button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+            >
+                {isLoading ? 'Searching...' : 'Search'}
+            </button>}
         </div>
     );
-};
+}
