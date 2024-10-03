@@ -1,9 +1,9 @@
 import { Filters, CarData } from '@/types/CarData';
 
 export const initialFilters: Filters = {
-    make: null,
-    model: null,
-    trim: null,
+    make: [],
+    model: [],
+    trim: [],
     mileage: null,
     exteriorColor: null,
     interiorColor: null,
@@ -15,7 +15,7 @@ export const initialFilters: Filters = {
     endDate: null,
     listingType: null,
     onlyWithPricing: true, // Add this new filter
-    year: null,
+    year: [],
 };
 
 export const applyTimeFilter = (filters: Filters): Filters => {
@@ -106,13 +106,19 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
         const matchesTransmission = !filters.transmission ||
             (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));
 
-        const matchesMake = !filters.make || (car.make && car.make.toLowerCase() === filters.make.toLowerCase());
-        const matchesModel = !filters.model || (car.model && car.model.toLowerCase() === filters.model.toLowerCase());
+        const matchesMake = !filters.make || filters.make.length === 0 || 
+            (car.make && filters.make.some(make => car.make.toLowerCase() === make.toLowerCase()));
+        const matchesModel = !filters.model || filters.model.length === 0 || 
+            (car.model && filters.model.some(model => car.model.toLowerCase() === model.toLowerCase()));
+        const matchesTrim = !filters.trim || filters.trim.length === 0 || 
+            (car.trim && filters.trim.some(trim => car.trim.toLowerCase() === trim.toLowerCase()));
+        const matchesYear = !filters.year || filters.year.length === 0 || 
+            (car.year && filters.year.includes(car.year));
 
         return (
             matchesMake &&
             matchesModel &&
-            (!filters.trim || car.trim === filters.trim) &&
+            matchesTrim &&
             (!filters.mileage || (car.mileage !== null && car.mileage <= filters.mileage)) &&
             matchesColor(car.exterior_color, filters.exteriorColor) &&
             matchesColor(car.interior_color, filters.interiorColor) &&
@@ -120,7 +126,7 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             (!filters.drivetrain || car.drivetrain === filters.drivetrain) &&
             matchesListingType &&
             isInTimeRange &&
-            (!filters.year || car.year === filters.year)
+            matchesYear
         );
     });
 };

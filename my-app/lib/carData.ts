@@ -13,24 +13,28 @@ function convertToLowerCase(obj: any): any {
   }, {} as any);
 }
 
-export async function fetchCarDataByFilters(make: string, model: string, trim: string, year: number | null): Promise<CarData[]> {
+export async function fetchCarDataByFilters(
+    make: string[] | null,
+    model: string[] | null,
+    trim: string[] | null,
+    year: number[] | null
+): Promise<CarData[]> {
     let query = supabase
         .from('processed_bot_listings')
         .select('*', { count: 'exact' })
 
-    if (make) {
-        query = query.ilike('make', `${make}`)
+    if (make && make.length > 0) {
+        query = query.in('make', make)
     }
-    if (model) {
-        query = query.ilike('model', `${model}`)
+    if (model && model.length > 0) {
+        query = query.in('model', model)
     }
-    if (trim) {
-        query = query.ilike('trim', `${trim}`)
+    if (trim && trim.length > 0) {
+        query = query.in('trim', trim)
     }
-    if (year !== null) {
-        query = query.eq('year', year)
+    if (year && year.length > 0) {
+        query = query.in('year', year)
     }
-
 
     // First, get the total count
     const { count, error: countError } = await query;
@@ -96,22 +100,22 @@ export async function fetchUniqueFilterValues(): Promise<{ make: string[], model
     return uniqueValues;
 }
 
-export async function fetchFilteredUniqueValues(filters: Partial<{ make: string | null; model: string | null; trim: string | null; year: number | null; }>): Promise<{ make: string[]; model: string[]; trim: string[]; year: number[]; }> {
+export async function fetchFilteredUniqueValues(filters: Partial<{ make: string[]; model: string[]; trim: string[]; year: number[]; }>): Promise<{ make: string[]; model: string[]; trim: string[]; year: number[]; }> {
     let query = supabase
         .from('processed_bot_listings')
         .select('make, model, trim, year')
 
-    if (filters.make) {
-        query = query.ilike('make', `${filters.make}`)
+    if (filters.make && filters.make.length > 0) {
+        query = query.in('make', filters.make)
     }
-    if (filters.model) {
-        query = query.ilike('model', `${filters.model}`)
+    if (filters.model && filters.model.length > 0) {
+        query = query.in('model', filters.model)
     }
-    if (filters.trim) {
-        query = query.ilike('trim', `${filters.trim}`)
+    if (filters.trim && filters.trim.length > 0) {
+        query = query.in('trim', filters.trim)
     }
-    if (filters.year !== null) {
-        query = query.eq('year', filters.year)
+    if (filters.year && filters.year.length > 0) {
+        query = query.in('year', filters.year)
     }
 
     const { data, error } = await query

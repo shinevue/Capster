@@ -1,22 +1,14 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { CarData, Filters } from '@/types/CarData';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectItem } from "@nextui-org/react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-import '../styles/FilterGrid.css';
 import { capitalizeWords } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import "@/styles/FilterGrid.css";
 
 interface FilterGridProps {
     data: CarData[];
@@ -48,6 +40,8 @@ const mileageRanges = [
 ];
 
 export function FilterGrid({ data, currentFilters, handleFilterChange, handleSubmit, includedFilters, isLoading, uniqueFilterValues }: FilterGridProps) {
+    const [tempSelectedValues, setTempSelectedValues] = useState<Partial<Filters>>({});
+
     const uniqueOptions = (key: keyof CarData) => {
         return Array.from(new Set(data?.map(item => item[key])))
             .filter(Boolean)
@@ -55,7 +49,18 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
     };
 
     const handleFilterChangeLocal = (key: keyof Filters, value: any) => {
-        handleFilterChange({ ...currentFilters, [key]: value === 'all' ? null : value });
+        handleFilterChange({ ...currentFilters, [key]: value.length === 0 ? null : value });
+    };
+
+    const handleSelectionChange = (key: keyof Filters, keys: any) => {
+        setTempSelectedValues(prev => ({ ...prev, [key]: Array.from(keys) }));
+    };
+
+    const handleClose = (key: keyof Filters) => {
+        if (tempSelectedValues[key] !== undefined) {
+            handleFilterChangeLocal(key, tempSelectedValues[key]);
+            setTempSelectedValues(prev => ({ ...prev, [key]: undefined }));
+        }
     };
 
     const filterConfig: Record<keyof Filters, { label: string; options: any[]; }> = {
@@ -98,26 +103,19 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
                 return (
                     <div key={key} className="flex-grow max-w-xs space-y-2 mr-4">
                         <Select
-                            value={(currentFilters[key as keyof Filters] as string) || 'all'}
-                            onValueChange={(value) => handleFilterChangeLocal(key as keyof Filters, value)}
+                            variant={"bordered"}
+                            label={config.label}
+                            selectionMode="multiple"
+                            selectedKeys={tempSelectedValues[key as keyof Filters] || []}
+                            onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
+                            onClose={() => handleClose(key as keyof Filters)}
+                            className="w-[250px] h-[40px]"
                         >
-                            <SelectTrigger className="w-[250px]">
-                                <SelectValue placeholder={`Select ${config.label}`} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>{config.label}</SelectLabel>
-                                    <SelectItem value="all">All {config.label}s</SelectItem>
-                                    {config.options.map((option) => (
-                                        <SelectItem
-                                            key={option.value?.toString() || option}
-                                            value={option.value?.toString() || option}
-                                        >
-                                            {capitalizeWords(option.label || option)}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
+                            {config.options.map((option) => (
+                                <SelectItem key={option.value?.toString() || option} value={option.value?.toString() || option} className="py-2">
+                                    {capitalizeWords(option.label || option)}
+                                </SelectItem>
+                            ))}
                         </Select>
                     </div>
                 );

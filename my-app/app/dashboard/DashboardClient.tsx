@@ -51,12 +51,6 @@ export default function DashboardClient() {
     const [kpiComparison, setKpiComparison] = useState<KPIComparison | null>(default_kpiComparison);
     const [preloadedImages, setPreloadedImages] = useState<{ [key: string]: string; }>({});
     const [carData, setCarData] = useState<CarData[]>([]);
-    const [searchParams, setSearchParams] = useState({
-        make: '',
-        model: '',
-        trim: '',
-        year: '',
-    });
     const [isLoading, setIsLoading] = useState(false);
     const [uniqueFilterValues, setUniqueFilterValues] = useState<{ make: string[], model: string[], trim: string[], year: number[]; }>({
         make: [],
@@ -90,21 +84,21 @@ export default function DashboardClient() {
         }));
     };
 
+    async function loadInitialUniqueFilterValues() {
+        try {
+            const values = await fetchUniqueFilterValues();
+            setUniqueFilterValues(values);
+        } catch (error) {
+            console.error('Error loading initial unique filter values:', error);
+        }
+    }
+
     useEffect(() => {
         // Initialize with the default option (Last week)
         handleTimeFilterChange(filters?.period, filters?.periodCount);
     }, []);
 
     useEffect(() => {
-        async function loadInitialUniqueFilterValues() {
-            try {
-                const values = await fetchUniqueFilterValues();
-                setUniqueFilterValues(values);
-            } catch (error) {
-                console.error('Error loading initial unique filter values:', error);
-            }
-        }
-
         loadInitialUniqueFilterValues();
     }, []);
 
@@ -113,10 +107,10 @@ export default function DashboardClient() {
         try {
             const { make, model, trim, year } = newFilters;
             const data = await fetchCarDataByFilters(
-                make || '',
-                model || '',
-                trim || '',
-                year ? parseInt(year.toString()) : null
+                make || [],
+                model || [],
+                trim || [],
+                year ? parseInt(year.toString()) : []
             );
             setCarData(data);
             setFilters(newFilters);
@@ -129,11 +123,12 @@ export default function DashboardClient() {
 
     const updateUniqueFilterValues = async (currentFilters: Filters) => {
         try {
+            console.log("currentFilters,", currentFilters);
             const values = await fetchFilteredUniqueValues({
-                make: currentFilters.make || null,
-                model: currentFilters.model || null,
-                trim: currentFilters.trim || null,
-                year: currentFilters.year ? parseInt(currentFilters.year.toString()) : null,
+                make: currentFilters.make || [],
+                model: currentFilters.model || [],
+                trim: currentFilters.trim || [],
+                year: currentFilters.year ? parseInt(currentFilters.year.toString()) : [],
             });
             setUniqueFilterValues(values);
         } catch (error) {
@@ -183,6 +178,8 @@ export default function DashboardClient() {
     };
 
     const handleResetFilters = useCallback(() => {
+        loadInitialUniqueFilterValues();
+
         setFilters(initialFilters);
         setCarData([]);
         // updateUniqueFilterValues(initialFilters);
