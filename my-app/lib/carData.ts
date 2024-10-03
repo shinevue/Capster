@@ -2,7 +2,7 @@ import { CarData } from '@/types/CarData'
 import { supabase } from './supabase-client'
 
 
-const pageSize = 1000
+const pageSize = 500
 const parallelFetchCount = 6
 
 // Helper function to convert string fields to lowercase

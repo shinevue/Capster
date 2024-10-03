@@ -77,7 +77,7 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
     };
 
     return (
-        <div className="flex gap-6 mb-8 flex-wrap">
+        <div className="flex gap-6 flex-wrap">
             {Object.entries(filterConfig).map(([key, config]) => {
                 if (!includedFilters.includes(key as keyof Filters)) return null;
 

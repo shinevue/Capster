@@ -190,7 +190,7 @@ export default function DashboardClient() {
 
     return (
         <DashboardLayout>
-            <div className="flex md:flex-row flex-col justify-between items-center mb-4">
+            <div className="flex md:flex-row flex-col justify-between align-center items-center mb-4">
                 <FilterGrid
                     data={filteredData}
                     currentFilters={filters}
@@ -214,13 +214,15 @@ export default function DashboardClient() {
                 {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
             </div>
 
-            <FilterSection
-                filteredData={filteredData}
-                filters={filters}
-                handleFilterChange={handleFilterChange}
-                handleApplyFilters={handleApplyFilters}
-                handleTimeFilterChange={handleTimeFilterChange}
-            />
+            <div className='mb-10'>
+                <FilterSection
+                    filteredData={filteredData}
+                    filters={filters}
+                    handleFilterChange={handleFilterChange}
+                    handleApplyFilters={handleApplyFilters}
+                    handleTimeFilterChange={handleTimeFilterChange}
+                />
+            </div>
 
             <ChartSection
                 filteredData={filteredData}
