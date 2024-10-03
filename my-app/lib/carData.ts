@@ -3,7 +3,7 @@ import { supabase } from './supabase-client'
 
 
 const pageSize = 1000
-const parallelFetchCount = 10
+const parallelFetchCount = 6
 
 // Helper function to convert string fields to lowercase
 function convertToLowerCase(obj: any): any {
