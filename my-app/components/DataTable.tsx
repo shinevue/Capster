@@ -199,10 +199,6 @@ const DataTable = <T extends Record<string, any>>({
         };
     }, [isLoading, virtualRows.length]);
 
-    if (virtualRows.length === 0 && !isLoading) {
-        return <div>No data available</div>;
-    }
-
     return (
         <div className="relative" style={{ minHeight: "500px", height: `${data?.length * 50}px`, maxHeight: "1000px" }}>
             <div className="sticky top-0 z-10 bg-background">
