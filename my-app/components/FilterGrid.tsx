@@ -11,13 +11,13 @@ import { motion } from 'framer-motion';
 import "@/styles/FilterGrid.css";
 
 interface FilterGridProps {
-    data: CarData[];
-    currentFilters: Filters;
-    handleFilterChange: (filters: Filters) => void;
-    handleSubmit: () => void;
-    includedFilters: (keyof Filters)[];
-    isLoading: boolean;
-    uniqueFilterValues: {
+    data?: CarData[];
+    currentFilters?: Filters;
+    handleFilterChange?: (filters: Filters) => void;
+    handleSubmit?: () => void;
+    includedFilters?: (keyof Filters)[];
+    isLoading?: boolean;
+    uniqueFilterValues?: {
         make: string[],
         model: string[],
         trim: string[],
@@ -51,9 +51,9 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
     const handleFilterChangeLocal = (key: keyof Filters, value: any) => {
         if (key === 'mileage') {
             const mileageValue = value !== null ? parseInt(value) : null;
-            handleFilterChange({ ...currentFilters, [key]: mileageValue });
+            handleFilterChange?.({ ...currentFilters, [key]: mileageValue || null } as Filters);
         } else {
-            handleFilterChange({ ...currentFilters, [key]: value.length === 0 ? null : value });
+            handleFilterChange?.({ ...currentFilters, [key]: value.length === 0 ? null : value } as Filters);
         }
     };
 
@@ -78,14 +78,13 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
             if (key !== 'mileage') {
                 handleFilterChangeLocal(key, tempSelectedValues[key]);
             }
-            setTempSelectedValues(prev => ({ ...prev, [key]: undefined }));
         }
     };
 
     const filterConfig: Record<keyof Filters, { label: string; options: any[]; }> = {
-        make: { label: 'Make', options: uniqueFilterValues?.make },
-        model: { label: 'Model', options: uniqueFilterValues?.model },
-        trim: { label: 'Trim', options: uniqueFilterValues?.trim },
+        make: { label: 'Make', options: uniqueFilterValues?.make || [] },
+        model: { label: 'Model', options: uniqueFilterValues?.model || [] },
+        trim: { label: 'Trim', options: uniqueFilterValues?.trim || [] },
         mileage: { label: 'Mileage', options: mileageRanges },
         exteriorColor: { label: 'Exterior Color', options: colorOptions },
         interiorColor: { label: 'Interior Color', options: colorOptions },
@@ -97,19 +96,19 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
         period: { label: 'Period', options: [] }, // Handled separately
         periodCount: { label: 'Period Count', options: [] }, // Handled separately
         onlyWithPricing: { label: 'Only With Pricing', options: [] }, // Handled separately
-        year: { label: 'Year', options: uniqueFilterValues?.year },
+        year: { label: 'Year', options: uniqueFilterValues?.year || [] },
     };
 
     return (
         <div className="flex gap-6 flex-wrap">
             {Object.entries(filterConfig).map(([key, config]) => {
-                if (!includedFilters.includes(key as keyof Filters)) return null;
+                if (!includedFilters?.includes(key as keyof Filters)) return null;
 
                 if (key === 'onlyWithPricing') {
                     return (
                         <div key={key} className="flex items-center space-x-2">
                             <Switch
-                                checked={currentFilters.onlyWithPricing}
+                                checked={currentFilters?.onlyWithPricing}
                                 onCheckedChange={(checked) => handleFilterChangeLocal('onlyWithPricing', checked)}
                             />
                             <Label className="text-sm font-medium text-gray-700">
@@ -127,11 +126,9 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
                             selectionMode={key === 'mileage' ? "single" : "multiple"}
                             selectedKeys={key === 'mileage'
                                 ? (tempSelectedValues[key as keyof Filters] !== undefined
-                                    ? [tempSelectedValues[key as keyof Filters]?.toString()]
-                                    : currentFilters[key as keyof Filters]
-                                        ? [currentFilters[key as keyof Filters]?.toString()]
-                                        : [])
-                                : (tempSelectedValues[key as keyof Filters] || currentFilters[key as keyof Filters] || [])
+                                    ? [tempSelectedValues[key as keyof Filters]?.toString() as string]
+                                    : undefined)
+                                : tempSelectedValues[key as keyof Filters] as Iterable<any> | undefined
                             }
                             onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
                             onClose={() => handleClose(key as keyof Filters)}

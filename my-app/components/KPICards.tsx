@@ -78,7 +78,7 @@ const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText,
     <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md relative">
         {hasMore && (
             <div className="absolute top-3.5 right-3.5">
-                <Spinner size="sm" />
+                <Spinner size="1" />
             </div>
         )}
         <Flex direction="column" gap="1" className='px-4'>
