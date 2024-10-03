@@ -9,6 +9,7 @@ import { FaFilter } from 'react-icons/fa';
 interface FilterSectionProps {
     filteredData: CarData[];
     filters: Filters;
+    handleFilterChange: (newFilters: Filters) => void;
     handleApplyFilters: (newFilters: Filters) => void;
     handleTimeFilterChange: (newPeriod: 'day' | 'week' | 'month' | null, newPeriodCount: number | null) => void;
 }
@@ -16,6 +17,7 @@ interface FilterSectionProps {
 export const FilterSection: React.FC<FilterSectionProps> = ({
     filteredData,
     filters,
+    handleFilterChange,
     handleApplyFilters,
     handleTimeFilterChange
 }) => {
@@ -67,7 +69,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                                         <FilterGrid
                                             data={filteredData}
                                             currentFilters={filters}
-                                            onApplyFilters={(newFilters) => {
+                                            handleFilterChange={(newFilters) => {
                                                 handleApplyFilters(newFilters);
                                                 setIsFilterModalOpen(false);
                                             }}
@@ -86,7 +88,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                 <FilterGrid
                     data={filteredData}
                     currentFilters={filters}
-                    onApplyFilters={handleApplyFilters}
+                    handleFilterChange={handleApplyFilters}
                     includedFilters={otherFilters}
                 />
             )}

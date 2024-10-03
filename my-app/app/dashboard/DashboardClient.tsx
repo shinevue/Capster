@@ -182,6 +182,7 @@ export default function DashboardClient() {
             <FilterSection
                 filteredData={filteredData}
                 filters={filters}
+                handleFilterChange={handleFilterChange}
                 handleApplyFilters={handleApplyFilters}
                 handleTimeFilterChange={handleTimeFilterChange}
             />
