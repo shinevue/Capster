@@ -7,7 +7,7 @@ import { CarData } from '@/types/CarData';
 import { useMediaQuery } from 'react-responsive'; // Add this import
 import { motion } from 'framer-motion';
 import { ChartToggleButton } from '@/components/chartToggleButton';
-import { FaChartLine } from 'react-icons/fa'; // Updated import
+import { FaChartLine, FaListUl, FaShoppingCart } from 'react-icons/fa'; // Updated import
 
 interface LineChartComponentProps {
     data: CarData[];
@@ -17,7 +17,7 @@ interface LineChartComponentProps {
     endDate: Date | null;
 }
 
-const parseDate = (dateString: string | null): Date | null => {
+const parseDate = (dateString: string | null | undefined): Date | null => {
     if (!dateString) return null;
     const [day, month, year] = dateString.split('/').map(Number);
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
@@ -45,52 +45,76 @@ const ToggleButton: React.FC<{ label: string; isActive: boolean; onClick: () => 
 );
 
 export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, onDataSelection, onTimeSelection, startDate, endDate }) => {
-    const [showMainLine, setShowMainLine] = useState(true);
+    const [showListedLine, setShowListedLine] = useState(true);
+    const [showSoldLine, setShowSoldLine] = useState(true);
     const [show7DayMA, setShow7DayMA] = useState(false);
     const [show30DayMA, setShow30DayMA] = useState(false);
 
     const { chartData } = useMemo(() => {
-        const counts: Record<string, { count: number; totalPrice: number; minPrice: number; maxPrice: number; listings: CarData[]; }> = {};
+        const counts: Record<string, {
+            listedCount: number;
+            listedTotalPrice: number;
+            soldCount: number;
+            soldTotalPrice: number;
+            minPrice: number;
+            maxPrice: number;
+            listings: CarData[];
+        }> = {};
 
         data.forEach(car => {
-            const date = parseDate(car.date_listed);
-            if (!date) return;
+            const listedDate = parseDate(car.date_listed);
+            const soldDate = parseDate(car.date_sold);
 
-            // Use toISOString and split to get YYYY-MM-DD format
-            const key = date.toISOString().split('T')[0];
+            if (listedDate) {
+                const listedKey = listedDate.toISOString().split('T')[0];
+                if (!counts[listedKey]) {
+                    counts[listedKey] = { listedCount: 0, listedTotalPrice: 0, soldCount: 0, soldTotalPrice: 0, minPrice: Infinity, maxPrice: -Infinity, listings: [] };
+                }
+                counts[listedKey].listedCount += 1;
+                if (car.price !== null) {
+                    counts[listedKey].listedTotalPrice += car.price;
+                    counts[listedKey].minPrice = Math.min(counts[listedKey].minPrice, car.price);
+                    counts[listedKey].maxPrice = Math.max(counts[listedKey].maxPrice, car.price);
+                }
+                counts[listedKey].listings.push(car);
+            }
 
-            if (!counts[key]) {
-                counts[key] = { count: 0, totalPrice: 0, minPrice: Infinity, maxPrice: -Infinity, listings: [] };
+            if (soldDate) {
+                const soldKey = soldDate.toISOString().split('T')[0];
+                if (!counts[soldKey]) {
+                    counts[soldKey] = { listedCount: 0, listedTotalPrice: 0, soldCount: 0, soldTotalPrice: 0, minPrice: Infinity, maxPrice: -Infinity, listings: [] };
+                }
+                counts[soldKey].soldCount += 1;
+                if (car.price !== null) {
+                    counts[soldKey].soldTotalPrice += car.price;
+                }
             }
-            counts[key].count += 1;
-            if (car.price !== null) {
-                counts[key].totalPrice += car.price;
-                counts[key].minPrice = Math.min(counts[key].minPrice, car.price);
-                counts[key].maxPrice = Math.max(counts[key].maxPrice, car.price);
-            }
-            counts[key].listings.push(car);
         });
 
         const chartData = Object.entries(counts)
             .map(([date, data]) => ({
                 date,
-                count: data.count,
-                averagePrice: data.count > 0 ? data.totalPrice / data.count : null,
+                listedCount: data.listedCount,
+                soldCount: data.soldCount,
+                averageListedPrice: data.listedCount > 0 ? data.listedTotalPrice / data.listedCount : null,
+                averageSoldPrice: data.soldCount > 0 ? data.soldTotalPrice / data.soldCount : null,
                 minPrice: data.minPrice !== Infinity ? data.minPrice : null,
                 maxPrice: data.maxPrice !== -Infinity ? data.maxPrice : null,
             }))
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        // Calculate moving averages
+        // Calculate moving averages (update this to include both listed and sold prices)
         const calculateMA = (data: any[], days: number) => {
             return data.map((entry, index, array) => {
                 const start = Math.max(0, index - days + 1);
                 const end = index + 1;
                 const slice = array.slice(start, end);
-                const sum = slice.reduce((acc, curr) => acc + (curr.averagePrice || 0), 0);
+                const listedSum = slice.reduce((acc, curr) => acc + (curr.averageListedPrice || 0), 0);
+                const soldSum = slice.reduce((acc, curr) => acc + (curr.averageSoldPrice || 0), 0);
                 return {
                     ...entry,
-                    [`ma${days}`]: slice.length > 0 ? sum / slice.length : null
+                    [`listedMa${days}`]: slice.length > 0 ? listedSum / slice.length : null,
+                    [`soldMa${days}`]: slice.length > 0 ? soldSum / slice.length : null
                 };
             });
         };
@@ -105,7 +129,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
     }, [data]);
 
     const isDataSuitable = useMemo(() => {
-        const validDataPoints = chartData.filter(entry => entry.averagePrice !== null);
+        const validDataPoints = chartData.filter(entry => entry.averageListedPrice !== null || entry.averageSoldPrice !== null);
         return validDataPoints.length > 0;
     }, [chartData]);
 
@@ -125,15 +149,24 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
                 return (
                     <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs dark:text-black">
                         <p className="label font-bold">{formatXAxis(label)}</p>
-                        {showMainLine && (
-                            <p>{`Avg: ${formatPrice(data.averagePrice)}`}</p>
+                        {showListedLine && (
+                            <p>{`Listed Avg: ${formatPrice(data.averageListedPrice)}`}</p>
                         )}
-                        <p>{`Count: ${data.count}`}</p>
-                        {show7DayMA && data.ma7 !== null && (
-                            <p>{`7D MA: ${formatPrice(data.ma7)}`}</p>
+                        {showSoldLine && (
+                            <p>{`Sold Avg: ${formatPrice(data.averageSoldPrice)}`}</p>
                         )}
-                        {show30DayMA && data.ma30 !== null && (
-                            <p>{`30D MA: ${formatPrice(data.ma30)}`}</p>
+                        <p>{`Listed: ${data.listedCount}, Sold: ${data.soldCount}`}</p>
+                        {show7DayMA && (
+                            <>
+                                <p>{`Listed 7D MA: ${formatPrice(data.listedMa7)}`}</p>
+                                <p>{`Sold 7D MA: ${formatPrice(data.soldMa7)}`}</p>
+                            </>
+                        )}
+                        {show30DayMA && (
+                            <>
+                                <p>{`Listed 30D MA: ${formatPrice(data.listedMa30)}`}</p>
+                                <p>{`Sold 30D MA: ${formatPrice(data.soldMa30)}`}</p>
+                            </>
                         )}
                     </div>
                 );
@@ -142,17 +175,26 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
             return (
                 <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
                     <p className="label text-gray-700 font-bold mb-2">{`Date: ${label}`}</p>
-                    {showMainLine && (
-                        <p className="value text-gray-900">{`Average Price: ${formatPrice(data.averagePrice)}`}</p>
+                    {showListedLine && (
+                        <p className="value text-gray-900">{`Average Listed Price: ${formatPrice(data.averageListedPrice)}`}</p>
                     )}
-                    <p className="count text-gray-600">{`Listings: ${data.count}`}</p>
+                    {showSoldLine && (
+                        <p className="value text-gray-900">{`Average Sold Price: ${formatPrice(data.averageSoldPrice)}`}</p>
+                    )}
+                    <p className="count text-gray-600">{`Listed: ${data.listedCount}, Sold: ${data.soldCount}`}</p>
                     <p className="min-price text-gray-600">{`Min Price: ${formatPrice(data.minPrice)}`}</p>
                     <p className="max-price text-gray-600">{`Max Price: ${formatPrice(data.maxPrice)}`}</p>
-                    {show7DayMA && data.ma7 !== null && (
-                        <p className="ma7 text-gray-600">{`7-Day MA: ${formatPrice(data.ma7)}`}</p>
+                    {show7DayMA && (
+                        <>
+                            <p className="ma7 text-gray-600">{`Listed 7-Day MA: ${formatPrice(data.listedMa7)}`}</p>
+                            <p className="ma7 text-gray-600">{`Sold 7-Day MA: ${formatPrice(data.soldMa7)}`}</p>
+                        </>
                     )}
-                    {show30DayMA && data.ma30 !== null && (
-                        <p className="ma30 text-gray-600">{`30-Day MA: ${formatPrice(data.ma30)}`}</p>
+                    {show30DayMA && (
+                        <>
+                            <p className="ma30 text-gray-600">{`Listed 30-Day MA: ${formatPrice(data.listedMa30)}`}</p>
+                            <p className="ma30 text-gray-600">{`Sold 30-Day MA: ${formatPrice(data.soldMa30)}`}</p>
+                        </>
                     )}
                 </div>
             );
@@ -176,25 +218,32 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
         <div className="relative w-full">
             <div className="mb-4 flex flex-wrap gap-1 md:gap-2">
                 <ChartToggleButton
-                    icon={<FaChartLine />}
-                    label="Main Line"
-                    isActive={showMainLine}
-                    onClick={() => setShowMainLine(!showMainLine)}
-                    color="bg-blue-500" // Matches the main line color
+                    icon={<FaListUl />}
+                    label="Listed"
+                    isActive={showListedLine}
+                    onClick={() => setShowListedLine(!showListedLine)}
+                    color="bg-blue-500"
+                />
+                <ChartToggleButton
+                    icon={<FaShoppingCart />}
+                    label="Sold"
+                    isActive={showSoldLine}
+                    onClick={() => setShowSoldLine(!showSoldLine)}
+                    color="bg-red-500"
                 />
                 <ChartToggleButton
                     icon={<FaChartLine />}
                     label="7-Day MA"
                     isActive={show7DayMA}
                     onClick={() => setShow7DayMA(!show7DayMA)}
-                    color="bg-green-500" // Matches the 7-day MA line color
+                    color="bg-green-500"
                 />
                 <ChartToggleButton
                     icon={<FaChartLine />}
                     label="30-Day MA"
                     isActive={show30DayMA}
                     onClick={() => setShow30DayMA(!show30DayMA)}
-                    color="bg-yellow-500" // Matches the 30-day MA line color
+                    color="bg-yellow-500"
                 />
             </div>
             <div className="w-full h-[400px]">
@@ -229,36 +278,67 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        {showMainLine && (
+                        {showListedLine && (
                             <Line
                                 type="monotone"
-                                dataKey="averagePrice"
+                                dataKey="averageListedPrice"
                                 stroke="#3b82f6"
                                 strokeWidth={3}
                                 dot={{ r: 5, strokeWidth: 2 }}
                                 activeDot={{ r: 9, strokeWidth: 0 }}
-                                name="Average Price"
+                                name="Average Listed Price"
+                            />
+                        )}
+                        {showSoldLine && (
+                            <Line
+                                type="monotone"
+                                dataKey="averageSoldPrice"
+                                stroke="#ef4444"
+                                strokeWidth={3}
+                                dot={{ r: 5, strokeWidth: 2 }}
+                                activeDot={{ r: 9, strokeWidth: 0 }}
+                                name="Average Sold Price"
                             />
                         )}
                         {show7DayMA && (
-                            <Line
-                                type="monotone"
-                                dataKey="ma7"
-                                stroke="#10b981"
-                                strokeWidth={2}
-                                dot={false}
-                                name="7-Day MA"
-                            />
+                            <>
+                                <Line
+                                    type="monotone"
+                                    dataKey="listedMa7"
+                                    stroke="#10b981"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    name="Listed 7-Day MA"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="soldMa7"
+                                    stroke="#14b8a6"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    name="Sold 7-Day MA"
+                                />
+                            </>
                         )}
                         {show30DayMA && (
-                            <Line
-                                type="monotone"
-                                dataKey="ma30"
-                                stroke="#f59e0b"
-                                strokeWidth={2}
-                                dot={false}
-                                name="30-Day MA"
-                            />
+                            <>
+                                <Line
+                                    type="monotone"
+                                    dataKey="listedMa30"
+                                    stroke="#f59e0b"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    name="Listed 30-Day MA"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="soldMa30"
+                                    stroke="#d97706"
+                                    strokeWidth={2}
+                                    dot={false}
+                                    name="Sold 30-Day MA"
+                                />
+                            </>
                         )}
                     </LineChart>
                 </ResponsiveContainer>

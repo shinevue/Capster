@@ -1,6 +1,6 @@
 "use client";
 
-import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { useMemo, useEffect } from 'react';
 import { CarData } from '@/types/CarData';
 import { useMediaQuery } from 'react-responsive';
@@ -34,11 +34,12 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
 
     const scatterData = useMemo(() => {
         return data
-            .filter(car => car.date_listed && car.price !== null && car.mileage !== null)
+            .filter(car => (car.date_listed || car.date_sold) && car.price !== null && car.mileage !== null)
             .map(car => ({
-                x: parseDate(car.date_listed)?.getTime() || 0,
+                x: parseDate(car.date_sold || car.date_listed)?.getTime() || 0,
                 y: car.price,
                 z: car.mileage,
+                isSold: !!car.date_sold,
                 ...car
             }))
             .sort((a, b) => a.x - b.x);
@@ -67,12 +68,13 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+            const dateField = data.isSold ? 'Sold' : 'Listed';
             if (isMobile) {
                 return (
                     <div className="custom-tooltip bg-white p-2 rounded-lg shadow-lg border border-gray-200 text-xs dark:text-black">
                         <p className="label font-bold">{`${data.year} ${data.make} ${data.model}`}</p>
                         <p>{`Price: ${formatPrice(data.y)}`}</p>
-                        <p>{`Listed: ${formatXAxis(data.x)}`}</p>
+                        <p>{`${dateField}: ${formatXAxis(data.x)}`}</p>
                         <p>{`Mileage: ${data.z.toLocaleString()}`}</p>
                     </div>
                 );
@@ -90,7 +92,7 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
                     )}
                     <p className="label text-gray-700 font-bold mb-2">{`${data.year} ${data.make} ${data.model}`}</p>
                     <p className="value text-gray-900">{`Price: ${formatPrice(data.y)}`}</p>
-                    <p className="date text-gray-600">{`Listed: ${new Date(data.x).toLocaleDateString()}`}</p>
+                    <p className="date text-gray-600">{`${dateField}: ${new Date(data.x).toLocaleDateString()}`}</p>
                     <p className="mileage text-gray-600">{`Mileage: ${data.z.toLocaleString()} miles`}</p>
                     <p className="trim text-gray-600">{`Trim: ${data.trim || 'N/A'}`}</p>
                     <p className="exterior text-gray-600">{`Exterior: ${data.exterior_color || 'N/A'}`}</p>
@@ -151,16 +153,30 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
                         />
                         <ZAxis dataKey="z" range={[20, 60]} name="Mileage" />
                         <Tooltip content={<CustomTooltip />} />
-                        <Scatter name="Cars" data={scatterData} fill="#3b82f6" shape="circle">
-                            {scatterData.map((entry, index) => (
+                        <Legend />
+                        <Scatter name="Listed Cars" data={scatterData.filter(car => !car.isSold)} fill="#3b82f6" shape="circle">
+                            {scatterData.filter(car => !car.isSold).map((entry, index) => (
                                 <circle
-                                    key={`circle-${index}`}
+                                    key={`circle-listed-${index}`}
                                     cx={0}
                                     cy={0}
                                     r={isMobile ? 5 : 7}
                                     fill="#3b82f6"
                                     fillOpacity={0.6}
                                     stroke="#3b82f6"
+                                />
+                            ))}
+                        </Scatter>
+                        <Scatter name="Sold Cars" data={scatterData.filter(car => car.isSold)} fill="#ef4444" shape="circle">
+                            {scatterData.filter(car => car.isSold).map((entry, index) => (
+                                <circle
+                                    key={`circle-sold-${index}`}
+                                    cx={0}
+                                    cy={0}
+                                    r={isMobile ? 5 : 7}
+                                    fill="#ef4444"
+                                    fillOpacity={0.6}
+                                    stroke="#ef4444"
                                 />
                             ))}
                         </Scatter>

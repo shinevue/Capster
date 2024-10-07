@@ -25,6 +25,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         'interior_color',
         'transmission',
         'date_listed',
+        'date_sold',
     ];
 
     const columnDisplayNames: Record<keyof CarData, string> = {
@@ -41,10 +42,10 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         interior_color: 'Int Color',
         transmission: 'Transmission',
         date_listed: 'Listed Date',
+        date_sold: 'Sold Date',
         source: 'Source',
         drivetrain: 'Drivetrain',
         photos: 'Photos',
-        sold_date: 'Sold Date',
     };
 
     const sortableColumns: (keyof CarData)[] = [
@@ -54,7 +55,8 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         'model',
         'trim',
         "date_listed",
-        "mileage"
+        "mileage",
+        "date_sold",
     ];
 
     const formatWithNA = <T,>(formatter: (value: T) => React.ReactNode) => (value: T | null) => {
@@ -102,6 +104,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         interior_color: '100px',
         transmission: '120px',
         date_listed: '120px',
+        date_sold: '120px',
     };
 
     if (!showDataTable) return null;

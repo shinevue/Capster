@@ -79,19 +79,24 @@ export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[]
             car.image = null;
         }
 
-        // Parse the date in "dd/mm/yy" format
-        let carDate = null;
-        if (car?.date_listed) {
-            const [day, month, year] = car.date_listed.split('/').map(Number);
+        // Parse the dates in "dd/mm/yy" format
+        const parseDate = (dateString: string | null | undefined): Date | null => {
+            if (!dateString) return null;
+            const [day, month, year] = dateString.split('/').map(Number);
             if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
                 const fullYear = year + 2000; // Assuming all years are in the 2000s
-                carDate = new Date(fullYear, month - 1, day); // month is 0-indexed in JavaScript Date
+                return new Date(fullYear, month - 1, day); // month is 0-indexed in JavaScript Date
             }
-        }   
+            return null;
+        };
 
-        const isInTimeRange = carDate && filters.startDate && filters.endDate
-        ? carDate >= filters.startDate && carDate <= filters.endDate
-        : true;
+        const listedDate = parseDate(car?.date_listed);
+        const soldDate = parseDate(car?.date_sold);
+
+        const isInTimeRange = filters.startDate && filters.endDate
+            ? (listedDate && listedDate >= filters.startDate && listedDate <= filters.endDate) ||
+              (soldDate && soldDate >= filters.startDate && soldDate <= filters.endDate)
+            : true;
 
         // Skip listings with null prices if onlyWithPricing is true
         if (filters.onlyWithPricing && (car.price === null || car.price === undefined)) {

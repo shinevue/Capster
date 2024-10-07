@@ -15,7 +15,7 @@ export interface CarData {
     photos: string;
     image: string | null;
     url: string | null;
-    sold_date: string | null;
+    date_sold?: string | null;
 }
 
 export interface Filters {
