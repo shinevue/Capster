@@ -30,7 +30,7 @@ interface UserListing {
   auction_end: string; // Date, not null
   auction_status: string; // Text, not null
   sold_price: number; // Integer, not null
-  sold_date: string; // Date, not null
+  date_sold: string; // Date, not null
   condition: string; // Text, not null
   location: string; // Text, not null
   lot_number: string; // Text, not null
@@ -60,7 +60,7 @@ interface BotListing {
     trim: string; // Text, not null
     location: string; // Text, not null
     price: number; // Integer, not null
-    sold_date: string; // Date, not null
+    date_sold: string; // Date, not null
     mileage: number; // Integer, not null
     exterior_color: string; // Text, not null
     interior_color: string; // Text, not null

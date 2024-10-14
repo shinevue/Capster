@@ -139,7 +139,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                     transmission: formatDefault,
                     drivetrain: formatDefault,
                     photos: formatDefault,
-                    sold_date: formatDefault,
+                    date_sold: formatDefault,
                 }}
                 columnWidths={columnWidths}
             />
