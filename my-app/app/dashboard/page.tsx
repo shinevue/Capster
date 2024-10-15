@@ -193,18 +193,11 @@ export default function Dashboard() {
                     currentFilters={filters}
                     handleFilterChange={handleFilterChange}
                     handleSubmit={handleSubmit}
+                    handleResetFilters={handleResetFilters}
                     includedFilters={topFilters}
                     isLoading={isLoading}
                     uniqueFilterValues={uniqueFilterValues}
                 />
-                <motion.button
-                    className="reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleResetFilters}
-                >
-                    Reset Filters
-                </motion.button>
             </div>
 
             <div className="mt-5 mb-10">

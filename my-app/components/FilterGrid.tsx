@@ -15,6 +15,7 @@ interface FilterGridProps {
     currentFilters?: Filters;
     handleFilterChange?: (filters: Filters) => void;
     handleSubmit?: () => void;
+    handleResetFilters?: () => void;
     includedFilters?: (keyof Filters)[];
     isLoading?: boolean;
     uniqueFilterValues?: {
@@ -39,7 +40,7 @@ const mileageRanges = [
     { value: Infinity, label: "Any mileage" },
 ];
 
-export function FilterGrid({ data, currentFilters, handleFilterChange, handleSubmit, includedFilters, isLoading, uniqueFilterValues }: FilterGridProps) {
+export function FilterGrid({ data, currentFilters, handleFilterChange, handleResetFilters, handleSubmit, includedFilters, isLoading, uniqueFilterValues }: FilterGridProps) {
     const [tempSelectedValues, setTempSelectedValues] = useState<Partial<Filters>>({});
 
     const uniqueOptions = (key: keyof CarData) => {
@@ -148,17 +149,29 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleSub
                     </div>
                 );
             })}
-            {handleSubmit &&
-                <motion.button
-                    className="flex items-center space-x-2 bg-primary text-primary-foreground px-5 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Filtering...' : 'Apply Filters'}
-                </motion.button>
-            }
+            <div className='flex justify-between w-full'>
+                {handleSubmit &&
+                    <motion.button
+                        className="flex items-center space-x-2 bg-primary text-primary-foreground px-5 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Filtering...' : 'Apply'}
+                    </motion.button>
+                }
+                {handleResetFilters &&
+                    <motion.button
+                        className="reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleResetFilters}
+                    >
+                        Reset
+                    </motion.button>
+                }
+            </div>
         </div>
     );
 }
