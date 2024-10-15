@@ -200,10 +200,6 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className="mt-5 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
-            </div>
-
             <div className='mb-10'>
                 <FilterSection
                     filteredData={filteredData}
@@ -212,6 +208,10 @@ export default function Dashboard() {
                     handleApplyFilters={handleApplyFilters}
                     handleTimeFilterChange={handleTimeFilterChange}
                 />
+            </div>
+
+            <div className="mt-5 mb-10">
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
             </div>
 
             <ChartSection
