@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import { CarData, Filters } from '@/types/CarData';
 import { Select, SelectItem } from "@nextui-org/react";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 
 import { capitalizeWords } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -83,6 +81,7 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleRes
     };
 
     const filterConfig: Record<keyof Filters, { label: string; options: any[]; }> = {
+        year: { label: 'Year', options: uniqueFilterValues?.year || [] },
         make: { label: 'Make', options: uniqueFilterValues?.make || [] },
         model: { label: 'Model', options: uniqueFilterValues?.model || [] },
         trim: { label: 'Trim', options: uniqueFilterValues?.trim || [] },
@@ -97,79 +96,70 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleRes
         period: { label: 'Period', options: [] }, // Handled separately
         periodCount: { label: 'Period Count', options: [] }, // Handled separately
         onlyWithPricing: { label: 'Only With Pricing', options: [] }, // Handled separately
-        year: { label: 'Year', options: uniqueFilterValues?.year || [] },
     };
 
     return (
-        <div className="flex gap-6 flex-wrap">
-            {Object.entries(filterConfig).map(([key, config]) => {
-                if (!includedFilters?.includes(key as keyof Filters)) return null;
+        <div className='w-full'>
+            <div className="w-full flex flex-col sm5:flex-row gap-6 items-center">
+                {Object.entries(filterConfig).map(([key, config]) => {
+                    if (!includedFilters?.includes(key as keyof Filters)) return null;
 
-                if (key === 'onlyWithPricing') {
+                    if (key === 'onlyWithPricing') return null;
+
                     return (
-                        <div key={key} className="flex items-center space-x-2">
-                            <Switch
-                                checked={currentFilters?.onlyWithPricing}
-                                onCheckedChange={(checked) => handleFilterChangeLocal('onlyWithPricing', checked)}
-                            />
-                            <Label className="text-sm font-medium text-gray-700">
-                                Only With Pricing
-                            </Label>
+                        <div key={key} className="w-full font-serif">
+                            <Select
+                                variant={"bordered"}
+                                label={config.label}
+                                selectionMode={key === 'mileage' ? "single" : "multiple"}
+                                selectedKeys={key === 'mileage'
+                                    ? (tempSelectedValues[key as keyof Filters] !== undefined
+                                        ? [tempSelectedValues[key as keyof Filters]?.toString() as string]
+                                        : undefined)
+                                    : tempSelectedValues[key as keyof Filters] as Iterable<any> | undefined
+                                }
+                                onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
+                                onClose={() => handleClose(key as keyof Filters)}
+                                className="w-full"
+                                popoverProps={{
+                                    classNames: {
+                                        content: ""
+                                    }
+                                }}
+                            >
+                                {config.options.map((option) => (
+                                    <SelectItem key={key === 'mileage' ? option.value.toString() : option.toString()} value={key === 'mileage' ? option.value.toString() : option.toString()} className="py-2">
+                                        {key === 'mileage' ? option.label : capitalizeWords(option.toString())}
+                                    </SelectItem>
+                                ))}
+                            </Select>
                         </div>
                     );
-                }
-
-                return (
-                    <div key={key} className="flex-grow space-y-2 mr-4">
-                        <Select
-                            variant={"bordered"}
-                            label={config.label}
-                            selectionMode={key === 'mileage' ? "single" : "multiple"}
-                            selectedKeys={key === 'mileage'
-                                ? (tempSelectedValues[key as keyof Filters] !== undefined
-                                    ? [tempSelectedValues[key as keyof Filters]?.toString() as string]
-                                    : undefined)
-                                : tempSelectedValues[key as keyof Filters] as Iterable<any> | undefined
-                            }
-                            onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
-                            onClose={() => handleClose(key as keyof Filters)}
-                            className="w-full min-w-[250px] max-w-[300px]"
-                            popoverProps={{
-                                classNames: {
-                                    content: "min-w-[250px] max-w-[300px]"
-                                }
-                            }}
-                        >
-                            {config.options.map((option) => (
-                                <SelectItem key={key === 'mileage' ? option.value.toString() : option.toString()} value={key === 'mileage' ? option.value.toString() : option.toString()} className="py-2">
-                                    {key === 'mileage' ? option.label : capitalizeWords(option.toString())}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                    </div>
-                );
-            })}
-            <div className='flex justify-between w-full'>
+                })}
                 {handleSubmit &&
-                    <motion.button
-                        className="flex items-center space-x-2 bg-primary text-primary-foreground px-5 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleSubmit}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'Filtering...' : 'Apply'}
-                    </motion.button>
+                    (<div className='w-full'>
+                        <motion.button
+                            className="w-full bg-blue-500 text-white px-5 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Filtering...' : 'Apply'}
+                        </motion.button>
+                    </div>)
                 }
                 {handleResetFilters &&
-                    <motion.button
-                        className="reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleResetFilters}
-                    >
-                        Reset
-                    </motion.button>
+                    (<div className='w-full'>
+                        <motion.button
+                            className="w-full reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleResetFilters}
+                        >
+                            Reset
+                        </motion.button>
+                    </div>)
                 }
             </div>
         </div>

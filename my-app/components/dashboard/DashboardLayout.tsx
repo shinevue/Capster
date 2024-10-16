@@ -11,7 +11,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="min-h-screen w-full flex flex-col text-gray-800 dark:text-gray-200 overflow-hidden mt-10 md:mt-20"
+            className="min-h-screen w-full flex flex-col text-gray-800 dark:text-gray-200 overflow-hidden mt-4 md:mt-0"
         >
             <main className="flex-grow flex flex-col overflow-hidden relative">
                 <motion.div

@@ -166,7 +166,7 @@ export default function Dashboard() {
 
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
-    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
+    const topFilters: (keyof Filters)[] = ['year', 'make', 'model', 'trim'];
 
     const handleSubmit = () => {
         handleSearch(filters);
