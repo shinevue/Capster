@@ -87,47 +87,49 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                     </AnimatePresence>
                 </Dialog.Root>
             ) : (
-                <FilterGrid
-                    data={filteredData}
-                    currentFilters={filters}
-                    handleFilterChange={handleApplyFilters}
-                    includedFilters={otherFilters}
-                />
-            )}
-            <div className='flex justify-end items-center m-5 gap-8'>
-                <div className="">
-                    <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                        <select
-                            className="appearance-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 shadow-md"
-                            value={`${filters.period}-${filters.periodCount}`}
-                            onChange={(e) => {
-                                const [period, count] = e.target.value.split('-');
-                                handleTimeFilterChange(period as 'day' | 'week' | 'month', parseInt(count));
-                            }}
-                        >
-                            <option value="day-7">Last week</option>
-                            <option value="day-30">Last 30 days</option>
-                            <option value="month-3">Last 3 months</option>
-                            <option value="month-6">Last 6 months</option>
-                            <option value="month-12">Last 12 months</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                            </svg>
-                        </div>
-                    </motion.div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Switch
-                        checked={filters?.onlyWithPricing}
-                        onCheckedChange={(checked) => handleFilterChange?.({ ...filters, 'onlyWithPricing': checked } as Filters)}
+                <div className='flex items-center gap-6'>
+                    <FilterGrid
+                        data={filteredData}
+                        currentFilters={filters}
+                        handleFilterChange={handleApplyFilters}
+                        includedFilters={otherFilters}
                     />
-                    <Label className="text-sm font-medium text-gray-700">
-                        Only With Pricing
-                    </Label>
+                    <div className='flex justify-end items-center gap-8'>
+                        <div className="">
+                            <motion.div whileHover={{ scale: 1.05 }} className="relative">
+                                <select
+                                    className="appearance-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 shadow-md"
+                                    value={`${filters.period}-${filters.periodCount}`}
+                                    onChange={(e) => {
+                                        const [period, count] = e.target.value.split('-');
+                                        handleTimeFilterChange(period as 'day' | 'week' | 'month', parseInt(count));
+                                    }}
+                                >
+                                    <option value="day-7">Last week</option>
+                                    <option value="day-30">Last 30 days</option>
+                                    <option value="month-3">Last 3 months</option>
+                                    <option value="month-6">Last 6 months</option>
+                                    <option value="month-12">Last 12 months</option>
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                    </svg>
+                                </div>
+                            </motion.div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Switch
+                                checked={filters?.onlyWithPricing}
+                                onCheckedChange={(checked) => handleFilterChange?.({ ...filters, 'onlyWithPricing': checked } as Filters)}
+                            />
+                            <Label className="text-sm font-medium text-gray-700 w-20">
+                                Pricing Only
+                            </Label>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </>
     );
 };

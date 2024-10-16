@@ -187,7 +187,7 @@ export default function Dashboard() {
 
     return (
         <DashboardLayout>
-            <div className="flex md:flex-row flex-col justify-between align-center items-center mb-4">
+            <div className="flex md:flex-row flex-col justify-between align-center items-center mb-4 bg-white p-6 rounded-md">
                 <FilterGrid
                     data={filteredData}
                     currentFilters={filters}
@@ -200,7 +200,7 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className='mb-10'>
+            <div className='mb-10 bg-white p-6 rounded-md'>
                 <FilterSection
                     filteredData={filteredData}
                     filters={filters}
@@ -210,7 +210,7 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className="mt-5 mb-10">
+            <div className="mt-3 mb-10">
                 {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
             </div>
 

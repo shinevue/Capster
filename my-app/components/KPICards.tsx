@@ -27,7 +27,7 @@ const KPICards: FC<KPICardsProps> = ({ kpiComparison, hasMore }) => {
     };
 
     return (
-        <Flex direction="row" gap="5" wrap="wrap" className="mb-6 mx-auto w-[85%] md:w-full">
+        <Flex direction="row" gap="5" wrap="wrap" className="mb-6 mx-auto w-full md:w-full">
             <KPICard
                 title="% Change"
                 value={`${Math.abs(current.percentageChange).toFixed(2)}%`}
@@ -81,16 +81,16 @@ const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, changeText,
                 <Spinner size="1" />
             </div>
         )}
-        <Flex direction="column" gap="1" className='px-4'>
-            <Text size="2" weight="bold" color="gray">
+        <Flex direction="column" gap="3" className='px-5 py-4'>
+            <Text size="3" weight="bold" color="gray">
                 {title}
             </Text>
             <Flex justify="between" align="center">
-                <Flex direction="column">
-                    <Text size="6" weight="bold" color={valueColor as any}>
+                <Flex direction="column" gap="3">
+                    <Text size="9" weight="bold"  align="center" color={valueColor as any}>
                         {value}
                     </Text>
-                    <Text size="2" color="gray">
+                    <Text size="3" color="gray">
                         {changeText}
                     </Text>
                 </Flex>

@@ -101,66 +101,68 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleRes
     return (
         <div className='w-full'>
             <div className="w-full flex flex-col sm5:flex-row gap-6 items-center">
-                {Object.entries(filterConfig).map(([key, config]) => {
-                    if (!includedFilters?.includes(key as keyof Filters)) return null;
+                <div className='flex w-full gap-3'>
+                    {Object.entries(filterConfig).map(([key, config]) => {
+                        if (!includedFilters?.includes(key as keyof Filters)) return null;
 
-                    if (key === 'onlyWithPricing') return null;
+                        if (key === 'onlyWithPricing') return null;
 
-                    return (
-                        <div key={key} className="w-full font-serif">
-                            <Select
-                                variant={"bordered"}
-                                label={config.label}
-                                selectionMode={key === 'mileage' ? "single" : "multiple"}
-                                selectedKeys={key === 'mileage'
-                                    ? (tempSelectedValues[key as keyof Filters] !== undefined
-                                        ? [tempSelectedValues[key as keyof Filters]?.toString() as string]
-                                        : undefined)
-                                    : tempSelectedValues[key as keyof Filters] as Iterable<any> | undefined
-                                }
-                                onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
-                                onClose={() => handleClose(key as keyof Filters)}
-                                className="w-full"
-                                popoverProps={{
-                                    classNames: {
-                                        content: ""
+                        return (
+                            <div key={key} className="w-full">
+                                <Select
+                                    variant={"bordered"}
+                                    label={config.label}
+                                    selectionMode={key === 'mileage' ? "single" : "multiple"}
+                                    selectedKeys={key === 'mileage'
+                                        ? (tempSelectedValues[key as keyof Filters] !== undefined
+                                            ? [tempSelectedValues[key as keyof Filters]?.toString() as string]
+                                            : undefined)
+                                        : tempSelectedValues[key as keyof Filters] as Iterable<any> | undefined
                                     }
-                                }}
+                                    onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
+                                    onClose={() => handleClose(key as keyof Filters)}
+                                    className="w-full font-thin !text-[240px]"
+                                    popoverProps={{
+                                        classNames: {
+                                            content: "font-extrabold"
+                                        }
+                                    }}
+                                >
+                                    {config.options.map((option) => (
+                                        <SelectItem key={key === 'mileage' ? option.value.toString() : option.toString()} value={key === 'mileage' ? option.value.toString() : option.toString()} className="py-2">
+                                            {key === 'mileage' ? option.label : capitalizeWords(option.toString())}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                            </div>
+                        );
+                    })}
+                </div>
+                {(handleSubmit || handleResetFilters) && (
+                    <div className='flex w-1/4 gap-3'>
+                        <div className='w-full'>
+                            <motion.button
+                                className="w-full bg-blue-500 text-white px-5 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleSubmit}
+                                disabled={isLoading}
                             >
-                                {config.options.map((option) => (
-                                    <SelectItem key={key === 'mileage' ? option.value.toString() : option.toString()} value={key === 'mileage' ? option.value.toString() : option.toString()} className="py-2">
-                                        {key === 'mileage' ? option.label : capitalizeWords(option.toString())}
-                                    </SelectItem>
-                                ))}
-                            </Select>
+                                {isLoading ? 'Filtering...' : 'Apply'}
+                            </motion.button>
                         </div>
-                    );
-                })}
-                {handleSubmit &&
-                    (<div className='w-full'>
-                        <motion.button
-                            className="w-full bg-blue-500 text-white px-5 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleSubmit}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Filtering...' : 'Apply'}
-                        </motion.button>
-                    </div>)
-                }
-                {handleResetFilters &&
-                    (<div className='w-full'>
-                        <motion.button
-                            className="w-full reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleResetFilters}
-                        >
-                            Reset
-                        </motion.button>
-                    </div>)
-                }
+                        <div className='w-full'>
+                            <motion.button
+                                className="w-full reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleResetFilters}
+                            >
+                                Reset
+                            </motion.button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
