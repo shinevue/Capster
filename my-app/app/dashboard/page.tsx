@@ -227,12 +227,7 @@ export default function Dashboard() {
                         transition={{ delay: 0.4, duration: 0.5 }}
                         className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
-                        <LineChartComponent
-                            data={filteredData}
-                            startDate={filters.startDate}
-                            endDate={filters.endDate}
-                        />
-                        <LineChartComponentMulti data={filteredData} title={"averageSoldPrice"} label='Sale Data' />
+                        <LineChartComponentMulti data={filteredData} label='Sale Data' />
                     </motion.div>
                 </div>
             </div>
@@ -249,12 +244,7 @@ export default function Dashboard() {
                         transition={{ delay: 0.4, duration: 0.5 }}
                         className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
-                        <LineChartComponent
-                            data={filteredData}
-                            startDate={filters.startDate}
-                            endDate={filters.endDate}
-                        />
-                        <LineChartComponentMulti data={filteredData} title={"averageListedPrice"} label='Listing Data' />
+                        <LineChartComponentMulti data={filteredData} label='Listing Data' />
                     </motion.div>
 
                     <motion.div
