@@ -5,6 +5,7 @@ import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -134,16 +135,13 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
     <Card>
       <CardHeader>
         <CardTitle>{label}</CardTitle>
+        <CardDescription>{isMobile ? "" : "Average Price"}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-96 w-full">
+      <CardContent className="p-0 pr-4 sm5:p-6">
+        <ChartContainer config={chartConfig} className="h-48 sm5:h-96 w-full">
           <LineChart
             accessibilityLayer
             data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
             <XAxis
@@ -163,7 +161,6 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
               fontSize={isMobile ? 10 : 14}
               tickLine={false}
               axisLine={false}
-              label={{ value: `${isMobile ? "" : "Average Price"}`, angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
               padding={{ top: 20, bottom: 20 }}
               tick={{
                   textAnchor: 'end',
@@ -184,7 +181,7 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
             )}
             {label == "Sale Data" && (
               <Line
-             dataKey="soldCount"
+                dataKey="soldCount"
                 type="monotone"
                 stroke="var(--color-soldCount)"
                 strokeWidth={2}

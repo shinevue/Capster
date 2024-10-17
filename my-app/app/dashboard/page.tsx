@@ -220,7 +220,7 @@ export default function Dashboard() {
             </div>
 
             <div className="mb-16"  >
-                <div className="flex flex-col space-y-20  px-1 md:px-0">
+                <div className="flex flex-col px-1 md:px-0">
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -242,7 +242,7 @@ export default function Dashboard() {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
-                        className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                        className={`bg-white dark:bg-gray-800 rounded-3xl sm5:rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
                         <LineChartComponentMulti data={filteredData} label='Listing Data' />
                     </motion.div>
@@ -251,7 +251,7 @@ export default function Dashboard() {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
-                        className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                        className={`bg-white dark:bg-gray-800 rounded-3xl sm5:rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
                         <ScatterChartComponent
                             data={filteredData}

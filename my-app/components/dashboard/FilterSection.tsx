@@ -31,13 +31,6 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
 
     return (
         <>
-            {/* <FilterGrid
-                data={filteredData}
-                currentFilters={filters}
-                onApplyFilters={handleApplyFilters}
-                includedFilters={topFilters}
-            /> */}
-
             {isMobile ? (
                 <Dialog.Root open={isFilterModalOpen} onOpenChange={setIsFilterModalOpen}>
                     <Dialog.Trigger asChild>
@@ -67,7 +60,34 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                                         transition={{ duration: 0.2 }}
                                         className="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-800 p-6 shadow-xl overflow-y-auto"
                                     >
-                                        <Dialog.Title className="text-xl font-bold mb-4 dark:text-gray-200">Filters</Dialog.Title>
+                                        <Dialog.Title className="flex justify-between my-4 items-center">
+                                            <div className='text-2xl font-bold dark:text-gray-200'>Filters</div>
+                                            <div className='text-sm flex justify-end items-center gap-8'>
+                                                <div>
+                                                    <motion.div whileHover={{ scale: 1.05 }} className="relative">
+                                                        <select
+                                                            className="appearance-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 shadow-md"
+                                                            value={`${filters.period}-${filters.periodCount}`}
+                                                            onChange={(e) => {
+                                                                const [period, count] = e.target.value.split('-');
+                                                                handleTimeFilterChange(period as 'day' | 'week' | 'month', parseInt(count));
+                                                            }}
+                                                        >
+                                                            <option value="day-7">Last week</option>
+                                                            <option value="day-30">Last 30 days</option>
+                                                            <option value="month-3">Last 3 months</option>
+                                                            <option value="month-6">Last 6 months</option>
+                                                            <option value="month-12">Last 12 months</option>
+                                                        </select>
+                                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                                                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                                            </svg>
+                                                        </div>
+                                                    </motion.div>
+                                                </div>
+                                            </div>
+                                        </Dialog.Title>
                                         <FilterGrid
                                             data={filteredData}
                                             currentFilters={filters}
@@ -78,7 +98,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                                             includedFilters={otherFilters.filter(filter => filter !== 'onlyWithPricing')}
                                         />
                                         <Dialog.Close asChild>
-                                            <button className="mt-4 p-2 px-6 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">Close</button>
+                                            <button className="mt-4 p-2 px-6 w-full bg-red-500 text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">Close</button>
                                         </Dialog.Close>
                                     </motion.div>
                                 </Dialog.Content>
@@ -95,7 +115,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                         includedFilters={otherFilters}
                     />
                     <div className='flex justify-end items-center gap-8'>
-                        <div className="">
+                        <div>
                             <motion.div whileHover={{ scale: 1.05 }} className="relative">
                                 <select
                                     className="appearance-none bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 shadow-md"

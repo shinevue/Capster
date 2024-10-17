@@ -23,34 +23,30 @@ const KPICards: FC<KPICardsProps> = ({ kpiComparison, hasMore, kpiTitle }) => {
     }
 
     return (
-        <Flex direction="row" gap="5" wrap="wrap" className="mx-auto w-full md:w-full">
+        <Flex className="mx-auto gap-1 sm5:gap-5">
             <KPICard
                 title={kpiTitle.title1}
                 value={`${Math.abs(current.percentageChange).toFixed(2)}%`}
-                icon={
-                    current.percentageChange >= 0
-                        ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
-                        : <ArrowDownIcon height={30} width={30} className="text-red-600" />
-                }
-                valueColor={current.percentageChange >= 0 ? "green" : "red"}
+                // icon={
+                //     current.percentageChange >= 0
+                //         ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
+                //         : <ArrowDownIcon height={30} width={30} className="text-red-600" />
+                // }
                 hasMore={false}
             />
             <KPICard
                 title={kpiTitle.title2}
                 value={formatNumber(current.totalListings)}
-                valueColor="blue"
                 hasMore={false}
             />
             <KPICard
                 title={kpiTitle.title3}
                 value={current?.averageDaysOnMarket?.toFixed(1) || 'N/A'}
-                valueColor="purple"
                 hasMore={false}
             />
             <KPICard
                 title={kpiTitle.title4}
                 value={formatCurrency(current?.averagePrice || 0)}
-                valueColor="yellow"
                 hasMore={false}
             />
         </Flex>
@@ -61,24 +57,23 @@ interface KPICardProps {
     title: string;
     value: string;
     icon?: React.ReactNode;
-    valueColor?: string;
     hasMore: boolean;
 }
 
-const KPICard: FC<KPICardProps> = ({ title, value, icon, valueColor, hasMore }) => (
-    <Card className="flex-1 min-w-[200px] sm:min-w-[150px] shadow-md relative">
+const KPICard: FC<KPICardProps> = ({ title, value, icon, hasMore }) => (
+    <Card className="flex-1 hadow-md relative">
         {hasMore && (
             <div className="absolute top-3.5 right-3.5">
                 <Spinner size="1" />
             </div>
         )}
-        <Flex direction="column" gap="3" className='px-5 py-4'>
-            <Text size="2" weight="bold" color="gray">
+        <Flex direction="column" justify="between" gap={"3"} className='h-full p-2 sm5:px-5 sm5:py-4'>
+            <Text color="gray" className='text-xs sm5:text-lg sm5:font-bold'>
                 {title}
             </Text>
             <Flex justify="between" align="center">
                 <Flex justify="center" width={"100%"}>
-                    <Text size="7" weight="bold"  align="center" color={valueColor as any}>
+                    <Text weight="bold"  align="center" color="blue" className='text-xl sm5:text-3xl'>
                         {value}
                     </Text>
                 </Flex>
