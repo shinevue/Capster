@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-white dark:bg-gray-900">
+      <body className="font-sans min-h-screen bg-white dark:bg-gray-900">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

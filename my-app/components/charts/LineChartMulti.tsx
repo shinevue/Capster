@@ -167,7 +167,6 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
               padding={{ top: 20, bottom: 20 }}
               tick={{
                   textAnchor: 'end',
-                  angle: -45,
                   dx: -10,
               } as any}
               width={isMobile ? 50 : 100}
