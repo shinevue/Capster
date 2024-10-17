@@ -1,13 +1,10 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,37 +15,47 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-export const description = "A multiple line chart";
+import { CarData } from '@/types/CarData';
+import { useMediaQuery } from "react-responsive";
 
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
+interface LineChartMultiComponentProps {
+  data: CarData[];
+  title: string;
+  label: string;
+}
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  listedPrice: {
+    label: "Listed Price",
     color: "hsl(var(--chart-1))",
   },
-  mobile: {
-    label: "Mobile",
+  soldPrice: {
+    label: "Sold Price",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;
 
-export function Component() {
+export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = ({data, title, label}) => {
+  console.log("data: ", data);
+  console.log("title: ", title);
+  const isMobile = useMediaQuery({ maxWidth: 767 });
+
+  const chartData = [
+    { date: "January", listedPrice: 186, soldPrice: 80 },
+    { date: "February", listedPrice: 305, soldPrice: 200 },
+    { date: "March", listedPrice: 237, soldPrice: 120 },
+    { date: "April", listedPrice: 73, soldPrice: 190 },
+    { date: "May", listedPrice: 209, soldPrice: 130 },
+    { date: "June", listedPrice: 214, soldPrice: 140 },
+  ];
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Line Chart - Multiple</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>{label}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className="h-96 w-full">
           <LineChart
             accessibilityLayer
             data={chartData}
@@ -57,44 +64,52 @@ export function Component() {
               right: 12,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
             <XAxis
-              dataKey="month"
+              dataKey="date"
+              stroke="#555555"
+              fontSize={isMobile ? 10 : 14}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) => value.slice(0, 3)}
+              padding={{ left: isMobile ? 0 : 30, right: isMobile ? 0 : 30 }}
+              interval="preserveStartEnd"
+              minTickGap={isMobile ? 30 : 50}
             />
+            <YAxis
+              stroke="#555555"
+              fontSize={isMobile ? 10 : 14}
+              tickLine={false}
+              axisLine={false}
+              label={{ value: `${isMobile ? "" : "Average Price"}`, angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 }}
+              padding={{ top: 20, bottom: 20 }}
+              tick={{
+                  textAnchor: 'end',
+                  angle: -45,
+                  dx: -10,
+              } as any}
+              width={isMobile ? 50 : 100}
+            />
+            <Legend />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <Line
-              dataKey="desktop"
+              dataKey="listedPrice"
               type="monotone"
-              stroke="var(--color-desktop)"
+              stroke="var(--color-listedPrice)"
               strokeWidth={2}
               dot={false}
             />
             <Line
-              dataKey="mobile"
+              dataKey="soldPrice"
               type="monotone"
-              stroke="var(--color-mobile)"
+              stroke="var(--color-soldPrice)"
               strokeWidth={2}
               dot={false}
             />
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-            </div>
-            <div className="flex items-center gap-2 leading-none text-muted-foreground">
-              Showing total visitors for the last 6 months
-            </div>
-          </div>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

@@ -11,8 +11,6 @@ import { FaChartLine, FaListUl, FaShoppingCart } from 'react-icons/fa'; // Updat
 
 interface LineChartComponentProps {
     data: CarData[];
-    onDataSelection: (data: CarData[]) => void;
-    onTimeSelection: (startDate: Date, endDate: Date) => void;
     startDate: Date | null;
     endDate: Date | null;
 }
@@ -44,7 +42,7 @@ const ToggleButton: React.FC<{ label: string; isActive: boolean; onClick: () => 
     </motion.button>
 );
 
-export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, onDataSelection, onTimeSelection, startDate, endDate }) => {
+export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, startDate, endDate }) => {
     const [showListedLine, setShowListedLine] = useState(true);
     const [showSoldLine, setShowSoldLine] = useState(true);
     const [show7DayMA, setShow7DayMA] = useState(false);

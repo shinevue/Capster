@@ -14,6 +14,7 @@ import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
 import { LineChartComponent } from "@/components/charts/LineChart";
+import { LineChartComponentMulti } from "@/components/charts/LineChartMulti";
 import { ScatterChartComponent } from "@/components/charts/ScatterChart";
 import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
 import { motion } from 'framer-motion';
@@ -224,15 +225,14 @@ export default function Dashboard() {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
-                        className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                        className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
                         <LineChartComponent
                             data={filteredData}
-                            onTimeSelection={() => { }}
-                            onDataSelection={() => { }}
                             startDate={filters.startDate}
                             endDate={filters.endDate}
                         />
+                        <LineChartComponentMulti data={filteredData} title={"averageSoldPrice"} label='Sale Data' />
                     </motion.div>
                 </div>
             </div>
@@ -247,22 +247,21 @@ export default function Dashboard() {
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
-                        className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                        className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
                         <LineChartComponent
                             data={filteredData}
-                            onTimeSelection={() => { }}
-                            onDataSelection={() => { }}
                             startDate={filters.startDate}
                             endDate={filters.endDate}
                         />
+                        <LineChartComponentMulti data={filteredData} title={"averageListedPrice"} label='Listing Data' />
                     </motion.div>
 
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.4, duration: 0.5 }}
-                        className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                        className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
                     >
                         <ScatterChartComponent
                             data={filteredData}
