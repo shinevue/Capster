@@ -118,15 +118,6 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
                                 </div>
                             </motion.div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Switch
-                                checked={filters?.onlyWithPricing}
-                                onCheckedChange={(checked) => handleFilterChange?.({ ...filters, 'onlyWithPricing': checked } as Filters)}
-                            />
-                            <Label className="text-sm font-medium text-gray-700 w-20">
-                                Pricing Only
-                            </Label>
-                        </div>
                     </div>
                 </div>
             )}

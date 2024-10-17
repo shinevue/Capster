@@ -13,12 +13,16 @@ import { preloadImages } from '@/lib/imageLoader';
 import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
+import { LineChartComponent } from "@/components/charts/LineChart";
+import { ScatterChartComponent } from "@/components/charts/ScatterChart";
 import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
 import { motion } from 'framer-motion';
+import { useMediaQuery } from 'react-responsive';
 
 export default function Dashboard() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const router = useRouter();
+    const isMobile = useMediaQuery({ maxWidth: 767 });
 
     useEffect(() => {
         if (!isAuthLoading && !user) {
@@ -210,15 +214,68 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className="mt-3 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
+            <div className="mb-4">
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} kpiTitle={{title1: "% Change",title2: "Average Sale",title3: "Lowest Sale",title4: "Highest Sale",}}/>}
             </div>
 
-            <ChartSection
-                filteredData={filteredData}
-                filters={filters}
-                imageLoader={imageLoader}
-            />
+            <div className="mb-16"  >
+                <div className="flex flex-col space-y-20  px-1 md:px-0">
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                    >
+                        <LineChartComponent
+                            data={filteredData}
+                            onTimeSelection={() => { }}
+                            onDataSelection={() => { }}
+                            startDate={filters.startDate}
+                            endDate={filters.endDate}
+                        />
+                    </motion.div>
+                </div>
+            </div>
+
+            <div className="mb-4">
+                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} kpiTitle={{title1: "% Change",title2: "Avg Price",title3: "Total Listings",title4: "Avg Days on Market",}} />}
+            </div>
+
+            <div className="mb-16"  >
+                <div className="flex flex-col gap-4 px-1 md:px-0">
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                    >
+                        <LineChartComponent
+                            data={filteredData}
+                            onTimeSelection={() => { }}
+                            onDataSelection={() => { }}
+                            startDate={filters.startDate}
+                            endDate={filters.endDate}
+                        />
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className={`bg-white dark:bg-gray-800 rounded-sm shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                    >
+                        <ScatterChartComponent
+                            data={filteredData}
+                            onTimeSelection={() => { }}
+                            onDataSelection={() => { }}
+                            startDate={filters.startDate}
+                            endDate={filters.endDate}
+                            imageLoader={imageLoader}
+                        />
+                    </motion.div>
+                </div>
+
+            </div>
 
             <DataTableSection
                 filteredData={filteredData}

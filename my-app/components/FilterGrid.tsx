@@ -121,7 +121,7 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleRes
                                     }
                                     onSelectionChange={(keys: any) => handleSelectionChange(key as keyof Filters, keys)}
                                     onClose={() => handleClose(key as keyof Filters)}
-                                    className="w-full font-thin !text-[240px]"
+                                    className="w-full font-thin text-medium"
                                     popoverProps={{
                                         classNames: {
                                             content: "font-extrabold"
