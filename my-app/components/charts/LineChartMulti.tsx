@@ -26,11 +26,11 @@ interface LineChartMultiComponentProps {
 }
 
 const chartConfig = {
-  listedCount: {
+  averageListedPrice: {
     label: "Listed Price",
     color: "hsl(var(--chart-1))",
   },
-  soldCount: {
+  averageSoldPrice: {
     label: "Sold Price",
     color: "hsl(var(--chart-2))",
   },
@@ -51,66 +51,93 @@ const parseDate = (dateString: string | null | undefined): Date | null => {
 export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = ({data, label}) => {
   const isMobile = useMediaQuery({ maxWidth: 767 });
 
-  const chartData = useMemo(() => {
+  const { chartData } = useMemo(() => {
     const counts: Record<string, {
-        listedCount: number;
-        soldCount: number;
+      listedCount: number;
+      listedTotalPrice: number;
+      soldCount: number;
+      soldTotalPrice: number;
+      minPrice: number;
+      maxPrice: number;
+      listings: CarData[];
     }> = {};
 
     data.forEach(car => {
-        const listedDate = parseDate(car.date_listed);
-        const soldDate = parseDate(car.date_sold);
+      const listedDate = parseDate(car.date_listed);
+      const soldDate = parseDate(car.date_sold);
 
-        if (listedDate) {
-            const listedKey = listedDate.toISOString().split('T')[0];
-            if (!counts[listedKey]) {
-                counts[listedKey] = { listedCount: 0, soldCount: 0 };
-            }
-            counts[listedKey].listedCount += 1;
-        }
+      if (listedDate) {
+          const listedKey = listedDate.toISOString().split('T')[0];
+          if (!counts[listedKey]) {
+              counts[listedKey] = { listedCount: 0, listedTotalPrice: 0, soldCount: 0, soldTotalPrice: 0, minPrice: Infinity, maxPrice: -Infinity, listings: [] };
+          }
+          counts[listedKey].listedCount += 1;
+          if (car.price !== null) {
+              counts[listedKey].listedTotalPrice += car.price;
+              counts[listedKey].minPrice = Math.min(counts[listedKey].minPrice, car.price);
+              counts[listedKey].maxPrice = Math.max(counts[listedKey].maxPrice, car.price);
+          }
+          counts[listedKey].listings.push(car);
+      }
 
-        if (soldDate) {
-            const soldKey = soldDate.toISOString().split('T')[0];
-            if (!counts[soldKey]) {
-                counts[soldKey] = { listedCount: 0, soldCount: 0 };
-            }
-            counts[soldKey].soldCount += 1;
-        }
+      if (soldDate) {
+          const soldKey = soldDate.toISOString().split('T')[0];
+          if (!counts[soldKey]) {
+              counts[soldKey] = { listedCount: 0, listedTotalPrice: 0, soldCount: 0, soldTotalPrice: 0, minPrice: Infinity, maxPrice: -Infinity, listings: [] };
+          }
+          counts[soldKey].soldCount += 1;
+          if (car.price !== null) {
+              counts[soldKey].soldTotalPrice += car.price;
+          }
+      }
     });
 
     const chartData = Object.entries(counts)
-        .map(([date, data]) => ({
-            date,
-            listedCount: data.listedCount,
-            soldCount: data.soldCount,
-        }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .map(([date, data]) => ({
+          date,
+          listedCount: data.listedCount,
+          soldCount: data.soldCount,
+          averageListedPrice: data.listedCount > 0 ? data.listedTotalPrice / data.listedCount : null,
+          averageSoldPrice: data.soldCount > 0 ? data.soldTotalPrice / data.soldCount : null,
+          minPrice: data.minPrice !== Infinity ? data.minPrice : null,
+          maxPrice: data.maxPrice !== -Infinity ? data.maxPrice : null,
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Calculate moving averages (update this to include both listed and sold prices)
+      // Calculate moving averages (update this to include both listed and sold prices)
     const calculateMA = (data: any[], days: number) => {
-        return data.map((entry, index, array) => {
-            const start = Math.max(0, index - days + 1);
-            const end = index + 1;
-            const slice = array.slice(start, end);
-            const listedSum = slice.reduce((acc, curr) => acc + (curr.averageListedPrice || 0), 0);
-            const soldSum = slice.reduce((acc, curr) => acc + (curr.averageSoldPrice || 0), 0);
-            return {
-                ...entry,
-                [`listedMa${days}`]: slice.length > 0 ? listedSum / slice.length : null,
-                [`soldMa${days}`]: slice.length > 0 ? soldSum / slice.length : null
-            };
-        });
+      return data.map((entry, index, array) => {
+          const start = Math.max(0, index - days + 1);
+          const end = index + 1;
+          const slice = array.slice(start, end);
+          const listedSum = slice.reduce((acc, curr) => acc + (curr.averageListedPrice || 0), 0);
+          const soldSum = slice.reduce((acc, curr) => acc + (curr.averageSoldPrice || 0), 0);
+          return {
+              ...entry,
+              [`listedMa${days}`]: slice.length > 0 ? listedSum / slice.length : null,
+              [`soldMa${days}`]: slice.length > 0 ? soldSum / slice.length : null
+          };
+      });
     };
 
     const dataWithMA = calculateMA(calculateMA(chartData, 7), 30);
 
-    return dataWithMA;
+    return {
+        chartData: dataWithMA,
+        entriesInTimeRange: data.length,
+        totalEntries: data.length
+    };
   }, [data]);
 
   const isDataSuitable = useMemo(() => {
       const validDataPoints = chartData.filter(entry => entry.averageListedPrice !== null || entry.averageSoldPrice !== null);
       return validDataPoints.length > 0;
   }, [chartData]);
+
+  const formatPrice = (value: number): string =>
+    value == null ? 'N/A' : `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+  const formatYAxis = (value: number) => formatPrice(value);
 
   if (!isDataSuitable) {
     return (
@@ -153,6 +180,7 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
               tickLine={false}
               axisLine={false}
               padding={{ top: 20, bottom: 20 }}
+              tickFormatter={formatYAxis}
               tick={{
                   textAnchor: 'end',
                   dx: -10,
@@ -163,18 +191,18 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             {label == "Listing Data" && (
               <Line
-                dataKey="listedCount"
+                dataKey="averageListedPrice"
                 type="monotone"
-                stroke="var(--color-listedCount)"
+                stroke="var(--color-averageListedPrice)"
                 strokeWidth={2}
                 dot={false}
               />
             )}
             {label == "Sale Data" && (
               <Line
-                dataKey="soldCount"
+                dataKey="averageSoldPrice"
                 type="monotone"
-                stroke="var(--color-soldCount)"
+                stroke="var(--color-averageSoldPrice)"
                 strokeWidth={2}
                 dot={false}
               />

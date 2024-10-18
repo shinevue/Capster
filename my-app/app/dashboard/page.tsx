@@ -185,7 +185,7 @@ export default function Dashboard() {
 
         setFilters(initialFilters);
         setCarData([]);
-        // updateUniqueFilterValues(initialFilters);
+        updateUniqueFilterValues(initialFilters);
     }, []);
 
     return (
@@ -203,7 +203,7 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className='mb-10 bg-white p-6 rounded-md'>
+            <div className='mb-10 bg-white p-0 sm5:p-6 rounded-md'>
                 <FilterSection
                     filteredData={filteredData}
                     filters={filters}
@@ -214,7 +214,7 @@ export default function Dashboard() {
             </div>
 
             <div className="mb-4">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} kpiTitle={{title1: "% Change",title2: "Average Sale",title3: "Lowest Sale",title4: "Highest Sale",}}/>}
+                {kpiComparison && <KPICards data={filteredData} kpiComparison={kpiComparison} hasMore={false} kpiTitle={"sale"}/>}
             </div>
 
             <div className="mb-16"  >
@@ -231,7 +231,7 @@ export default function Dashboard() {
             </div>
 
             <div className="mb-4">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} kpiTitle={{title1: "% Change",title2: "Avg Price",title3: "Total Listings",title4: "Avg Days on Market",}} />}
+                {kpiComparison && <KPICards data={filteredData} kpiComparison={kpiComparison} hasMore={false} kpiTitle={"list"} />}
             </div>
 
             <div className="mb-16"  >

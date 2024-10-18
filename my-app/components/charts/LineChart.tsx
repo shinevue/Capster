@@ -15,7 +15,7 @@ interface LineChartComponentProps {
     endDate: Date | null;
 }
 
-const parseDate = (dateString: string | null | undefined): Date | null => {
+export const parseDate = (dateString: string | null | undefined): Date | null => {
     if (!dateString) return null;
     const [day, month, year] = dateString.split('/').map(Number);
     if (isNaN(day) || isNaN(month) || isNaN(year)) {

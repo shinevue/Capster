@@ -1,56 +1,124 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Card, Flex, Text, Box, Spinner } from '@radix-ui/themes';
 import { formatCurrency, formatNumber } from '@/lib/utils';
 import { ArrowUpIcon, ArrowDownIcon } from '@radix-ui/react-icons';
 import { KPIComparison } from '@/lib/chartTransformers';
 
+import { CarData } from '@/types/CarData';
+import { parseDate } from './charts/LineChart';
+
 interface KPICardsProps {
+    data?: CarData[];
     kpiComparison: KPIComparison;
     hasMore: boolean;
-    kpiTitle: {
-        title1: string;
-        title2: string;
-        title3: string;
-        title4: string;
-    };
+    kpiTitle: string;
 }
 
-const KPICards: FC<KPICardsProps> = ({ kpiComparison, hasMore, kpiTitle }) => {
+const KPICards: FC<KPICardsProps> = ({ data, kpiComparison, hasMore, kpiTitle }) => {
     const { current, changes } = kpiComparison;
+    const [priceData, setPriceData] = useState({min: Infinity, max: -Infinity});
 
     if (!current || !changes) {
         return null;
     }
 
-    return (
-        <Flex className="mx-auto gap-1 sm5:gap-5">
-            <KPICard
-                title={kpiTitle.title1}
-                value={`${Math.abs(current.percentageChange).toFixed(2)}%`}
-                // icon={
-                //     current.percentageChange >= 0
-                //         ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
-                //         : <ArrowDownIcon height={30} width={30} className="text-red-600" />
-                // }
-                hasMore={false}
-            />
-            <KPICard
-                title={kpiTitle.title2}
-                value={formatNumber(current.totalListings)}
-                hasMore={false}
-            />
-            <KPICard
-                title={kpiTitle.title3}
-                value={current?.averageDaysOnMarket?.toFixed(1) || 'N/A'}
-                hasMore={false}
-            />
-            <KPICard
-                title={kpiTitle.title4}
-                value={formatCurrency(current?.averagePrice || 0)}
-                hasMore={false}
-            />
-        </Flex>
-    );
+    useEffect(()=>{
+        const counts: Record<string, {
+            minPrice: number;
+            maxPrice: number;
+            soldTotalPrice: number;
+        }> = {};
+
+        data?.forEach(car => {
+            const soldDate = parseDate(car.date_sold);
+
+            if (soldDate) {
+                const soldKey = soldDate.toISOString().split('T')[0];
+                if (!counts[soldKey]) {
+                    counts[soldKey] = { minPrice: Infinity, maxPrice: -Infinity, soldTotalPrice: 0 };
+                }
+                if (car.price !== null) {
+                    counts[soldKey].soldTotalPrice += car.price;
+                }
+            }
+        });
+        let minprince = Infinity;
+        let maxprince = -Infinity;
+        Object.entries(counts)
+            .map(([date, data]) => {
+                minprince = minprince < data.soldTotalPrice ? minprince : data.soldTotalPrice;
+                maxprince = maxprince > data.soldTotalPrice ? maxprince : data.soldTotalPrice;
+            });
+        setPriceData(prev => ({
+            ...prev,
+            min: minprince,
+            max: maxprince
+        }))
+
+
+    })
+
+    if(kpiTitle == "sale")
+        return (
+            <Flex className="mx-auto gap-1 sm5:gap-5">
+                <KPICard
+                    title="% Change"
+                    value={`${Math.abs(changes.averagePrice).toFixed(2)}%`}
+                    icon={
+                        current.percentageChange > 0
+                        ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
+                        : current.percentageChange < 0 ? <ArrowDownIcon height={30} width={30} className="text-red-600" /> : <></>
+                    }
+                    hasMore={false}
+                />
+                <KPICard
+                    title="Average Sale"
+                    value={`$${current.averagePrice.toFixed(2)}`}
+                    hasMore={false}
+                />
+                <KPICard
+                    title="Lowest Sale"
+                    value={`$${priceData.min}`}
+                    hasMore={false}
+                />
+                <KPICard
+                    title="Highest Sale"
+                    value={`$${priceData.max}`}
+                    hasMore={false}
+                />
+            </Flex>
+        );
+
+    if(kpiTitle == "list")
+        return (
+            <Flex className="mx-auto gap-1 sm5:gap-5">
+                <KPICard
+                    title="% Change"
+                    value={`${Math.abs(changes.totalListings).toFixed(2)}%`}
+                    icon={
+                        current.percentageChange > 0
+                            ? <ArrowUpIcon height={30} width={30} className="text-green-600" />
+                            : current.percentageChange < 0 ? <ArrowDownIcon height={30} width={30} className="text-red-600" /> : <></>
+                    }
+                    hasMore={false}
+                />
+                <KPICard
+                    title="Avg Price"
+                    value={`$${current.averagePrice.toFixed(2)}`}
+                    hasMore={false}
+                />
+                <KPICard
+                    title="Total Listings"
+                    value={`${current.totalListings}`}
+                    hasMore={false}
+                />
+                <KPICard
+                    title="Avg Days on Market"
+                    value={`${current?.averageDaysOnMarket || 0}`}
+                    hasMore={false}
+                />
+            </Flex>
+        );
 };
 
 interface KPICardProps {
@@ -68,7 +136,7 @@ const KPICard: FC<KPICardProps> = ({ title, value, icon, hasMore }) => (
             </div>
         )}
         <Flex direction="column" justify="between" gap={"3"} className='h-full p-2 sm5:px-5 sm5:py-4'>
-            <Text color="gray" className='text-xs sm5:text-lg sm5:font-bold'>
+            <Text color="gray" align="center" className='text-xs sm5:text-lg sm5:font-bold'>
                 {title}
             </Text>
             <Flex justify="between" align="center">
