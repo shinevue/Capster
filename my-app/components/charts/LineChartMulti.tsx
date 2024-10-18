@@ -51,15 +51,6 @@ const parseDate = (dateString: string | null | undefined): Date | null => {
 export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = ({data, label}) => {
   const isMobile = useMediaQuery({ maxWidth: 767 });
 
-  // const chartData = [
-  //   { date: "January", listedCount: 186, soldCount: 80 },
-  //   { date: "February", listedCount: 305, soldCount: 200 },
-  //   { date: "March", listedCount: 237, soldCount: 120 },
-  //   { date: "April", listedCount: 73, soldCount: 190 },
-  //   { date: "May", listedCount: 209, soldCount: 130 },
-  //   { date: "June", listedCount: 214, soldCount: 140 },
-  // ];
-
   const chartData = useMemo(() => {
     const counts: Record<string, {
         listedCount: number;

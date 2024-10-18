@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { FilterSection } from "@/components/dashboard/FilterSection";
-import { ChartSection } from "@/components/dashboard/ChartSection";
 import { DataTableSection } from "@/components/dashboard/DataTableSection";
 import KPICards from "@/components/KPICards";
 import { CarData, Filters } from '@/types/CarData';
@@ -13,7 +12,6 @@ import { preloadImages } from '@/lib/imageLoader';
 import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
-import { LineChartComponent } from "@/components/charts/LineChart";
 import { LineChartComponentMulti } from "@/components/charts/LineChartMulti";
 import { ScatterChartComponent } from "@/components/charts/ScatterChart";
 import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
