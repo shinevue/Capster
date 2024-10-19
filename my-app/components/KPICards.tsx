@@ -16,7 +16,7 @@ interface KPICardsProps {
 
 const KPICards: FC<KPICardsProps> = ({ data, kpiComparison, hasMore, kpiTitle }) => {
     const { current, changes } = kpiComparison;
-    const [priceData, setPriceData] = useState({min: Infinity, max: -Infinity});
+    const [priceData, setPriceData] = useState({min: 0, max: 0});
 
     if (!current || !changes) {
         return null;
@@ -35,7 +35,7 @@ const KPICards: FC<KPICardsProps> = ({ data, kpiComparison, hasMore, kpiTitle })
             if (soldDate) {
                 const soldKey = soldDate.toISOString().split('T')[0];
                 if (!counts[soldKey]) {
-                    counts[soldKey] = { minPrice: Infinity, maxPrice: -Infinity, soldTotalPrice: 0 };
+                    counts[soldKey] = { minPrice: Infinity, maxPrice: 0, soldTotalPrice: 0 };
                 }
                 if (car.price !== null) {
                     counts[soldKey].soldTotalPrice += car.price;
@@ -43,7 +43,7 @@ const KPICards: FC<KPICardsProps> = ({ data, kpiComparison, hasMore, kpiTitle })
             }
         });
         let minprince = Infinity;
-        let maxprince = -Infinity;
+        let maxprince = 0;
         Object.entries(counts)
             .map(([date, data]) => {
                 minprince = minprince < data.soldTotalPrice ? minprince : data.soldTotalPrice;
@@ -73,17 +73,17 @@ const KPICards: FC<KPICardsProps> = ({ data, kpiComparison, hasMore, kpiTitle })
                 />
                 <KPICard
                     title="Average Sale"
-                    value={`$${current.averagePrice.toFixed(2)}`}
+                    value={`$${formatNumber(Math.round(current.averagePrice))}`}
                     hasMore={false}
                 />
                 <KPICard
                     title="Lowest Sale"
-                    value={`$${priceData.min}`}
+                    value={`$${formatNumber(Math.round(priceData.min == Infinity ? 0 : priceData.min))}`}
                     hasMore={false}
                 />
                 <KPICard
                     title="Highest Sale"
-                    value={`$${priceData.max}`}
+                    value={`$${formatNumber(Math.round(priceData.max))}`}
                     hasMore={false}
                 />
             </Flex>
@@ -104,17 +104,17 @@ const KPICards: FC<KPICardsProps> = ({ data, kpiComparison, hasMore, kpiTitle })
                 />
                 <KPICard
                     title="Avg Price"
-                    value={`$${current.averagePrice.toFixed(2)}`}
+                    value={`$${formatNumber(Math.round(current.averagePrice))}`}
                     hasMore={false}
                 />
                 <KPICard
                     title="Total Listings"
-                    value={`${current.totalListings}`}
+                    value={`${formatNumber(Math.round(current.totalListings))}`}
                     hasMore={false}
                 />
                 <KPICard
                     title="Avg Days on Market"
-                    value={`${current?.averageDaysOnMarket || 0}`}
+                    value={`${formatNumber(Math.round(current?.averageDaysOnMarket || 0))}`}
                     hasMore={false}
                 />
             </Flex>
@@ -136,20 +136,19 @@ const KPICard: FC<KPICardProps> = ({ title, value, icon, hasMore }) => (
             </div>
         )}
         <Flex direction="column" justify="between" gap={"3"} className='h-full p-2 sm5:px-5 sm5:py-4'>
-            <Text color="gray" align="center" className='text-xs sm5:text-lg sm5:font-bold'>
+            <Text color="gray" align="center" className='text-xs sm5:text-md sm5:font-semibold md:text-lg md:font-bold'>
                 {title}
             </Text>
             <Flex justify="between" align="center">
-                <Flex justify="center" width={"100%"}>
-                    <Text weight="bold"  align="center" color="blue" className='text-xl sm5:text-3xl'>
+                <Flex justify="center" gap="2" width={"100%"} className='items-center'>
+                    <Text weight="bold"  align="center" color="blue" className='text-xl sm5:text-2xl md:text-3xl'>
                         {value}
                     </Text>
+
+                    {icon && (
+                        <div> {icon} </div>
+                    )}
                 </Flex>
-                {icon && (
-                    <Box>
-                        {icon}
-                    </Box>
-                )}
             </Flex>
         </Flex>
     </Card>

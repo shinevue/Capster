@@ -203,7 +203,7 @@ export default function Dashboard() {
                 />
             </div>
 
-            <div className='mb-10 bg-white p-0 sm5:p-6 rounded-md'>
+            <div className='mb-10 bg-white p-0 md:p-6 rounded-md'>
                 <FilterSection
                     filteredData={filteredData}
                     filters={filters}

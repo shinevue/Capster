@@ -8,6 +8,9 @@ import { useMediaQuery } from 'react-responsive';
 import {
     Card,
     CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 
 interface ScatterChartComponentProps {
@@ -122,6 +125,10 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
 
     return (
         <Card>
+            <CardHeader>
+                <CardTitle>{" "}</CardTitle>
+                <CardDescription>{isMobile ? "" : "Price"}</CardDescription>
+            </CardHeader>
             <CardContent>
                 <div className="relative w-full">
                     <div className="w-full h-80 sm5:h-[400px]">
@@ -150,7 +157,7 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
                                     fontSize={isMobile ? 10 : 14}
                                     tickLine={false}
                                     axisLine={false}
-                                    label={isMobile ? null : { value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 } as any}
+                                    label={isMobile ? null : { value: '', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 } as any}
                                     tick={{
                                         textAnchor: 'end',
                                         dx: -10
