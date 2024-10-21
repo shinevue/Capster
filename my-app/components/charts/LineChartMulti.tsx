@@ -220,6 +220,7 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
                   stroke="var(--color-averageListedPrice)"
                   strokeWidth={2}
                   dot={false}
+                  connectNulls={true}
                 />
                 {show7DayMA && (
                   <Line
@@ -251,6 +252,7 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
                   stroke="#4747aa"
                   strokeWidth={2}
                   dot={false}
+                  connectNulls={true}
                 />
 
                 {show7DayMA && (
