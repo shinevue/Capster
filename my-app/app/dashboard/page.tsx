@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { FilterSection } from "@/components/dashboard/FilterSection";
 import { DataTableSection } from "@/components/dashboard/DataTableSection";
@@ -110,12 +110,14 @@ export default function Dashboard() {
         try {
             const { make, model, trim, year } = newFilters;
 
+            const fetchStartTime = Date.now();
             const data = await fetchCarDataByFilters(
                 make ? make : null,
                 model ? model : null,
                 trim ? trim : null,
                 year ? year.map(y => parseInt(y.toString())) : null
             );
+
             setCarData(data);
             setFilters(newFilters);
         } catch (error) {
@@ -155,6 +157,7 @@ export default function Dashboard() {
         if (filters.startDate && filters.endDate) {
             const previousPeriodStart = new Date(filters.startDate.getTime() - (filters.endDate.getTime() - filters.startDate.getTime()));
             const previousPeriodEnd = new Date(filters.startDate);
+            const prevFilterStartTime = Date.now();
             const previousPeriodData = applyFiltersToData(carData, { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
             const previousKPIs = calculateKPIs(previousPeriodData);
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
@@ -164,7 +167,9 @@ export default function Dashboard() {
         }
 
         // Preload images for the filtered data
-        preloadImages(filteredData).then(setPreloadedImages);
+        preloadImages(filteredData).then((images) => {
+            setPreloadedImages(images);
+        });
     }, [filters, filteredData, carData]);
 
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);

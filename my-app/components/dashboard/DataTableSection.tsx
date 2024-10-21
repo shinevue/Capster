@@ -12,7 +12,7 @@ interface DataTableSectionProps {
 
 export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData, imageLoader, showDataTable }) => {
     const tableColumns: (keyof CarData)[] = [
-        'image',
+        'main_image',
         'url',
         "listing_type",
         'price',
@@ -29,7 +29,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
     ];
 
     const columnDisplayNames: Record<keyof CarData, string> = {
-        image: 'Image',
+        main_image: 'Image',
         url: 'URL',
         listing_type: 'Type',
         price: 'Price',
@@ -45,7 +45,6 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
         date_sold: 'Sold Date',
         source: 'Source',
         drivetrain: 'Drivetrain',
-        photos: 'Photos',
     };
 
     const sortableColumns: (keyof CarData)[] = [
@@ -91,7 +90,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
     const formatDefault = formatWithCapitalization((value: any) => String(value));
 
     const columnWidths: Partial<Record<keyof CarData, string>> = {
-        image: '100px',
+        main_image: '100px',
         url: '60px',
         listing_type: '60px',
         price: '100px',
@@ -128,7 +127,7 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                     source: formatDefault,
                     date_listed: formatDefault,
                     listing_type: formatDefault,
-                    image: formatDefault,
+                    main_image: formatDefault,
                     year: formatDefault,
                     make: formatDefault,
                     model: formatDefault,
@@ -138,7 +137,6 @@ export const DataTableSection: React.FC<DataTableSectionProps> = ({ filteredData
                     interior_color: formatDefault,
                     transmission: formatDefault,
                     drivetrain: formatDefault,
-                    photos: formatDefault,
                     date_sold: formatDefault,
                 }}
                 columnWidths={columnWidths}
