@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { FilterSection } from "@/components/dashboard/FilterSection";
 import { ChartSection } from "@/components/dashboard/ChartSection";
@@ -103,16 +103,22 @@ export default function Dashboard() {
     }, []);
 
     const handleSearch = async (newFilters: Filters) => {
+        const searchStartTime = Date.now();
+        console.log('Starting handleSearch');
         setIsLoading(true);
         try {
             const { make, model, trim, year } = newFilters;
 
+            const fetchStartTime = Date.now();
+            console.log('Starting fetchCarDataByFilters');
             const data = await fetchCarDataByFilters(
                 make ? make : null,
                 model ? model : null,
                 trim ? trim : null,
                 year ? year.map(y => parseInt(y.toString())) : null
             );
+            console.log(`fetchCarDataByFilters completed in ${Date.now() - fetchStartTime}ms`);
+
             setCarData(data);
             setFilters(newFilters);
         } catch (error) {
@@ -120,9 +126,12 @@ export default function Dashboard() {
         } finally {
             setIsLoading(false);
         }
+        console.log(`handleSearch completed in ${Date.now() - searchStartTime}ms`);
     };
 
     const updateUniqueFilterValues = async (currentFilters: Filters) => {
+        const startTime = Date.now();
+        console.log('Starting updateUniqueFilterValues');
         try {
             const values = await fetchFilteredUniqueValues({
                 make: currentFilters.make || [],
@@ -134,6 +143,7 @@ export default function Dashboard() {
         } catch (error) {
             console.error('Error updating unique filter values:', error);
         }
+        console.log(`updateUniqueFilterValues completed in ${Date.now() - startTime}ms`);
     };
 
     const handleFilterChange = (newFilters: Filters) => {
@@ -142,17 +152,25 @@ export default function Dashboard() {
     };
 
     const filteredData = useMemo(() => {
+        const startTime = Date.now();
+        console.log('Starting applyFiltersToData');
         const filtered = applyFiltersToData(carData, filters);
+        console.log(`Filtering ${carData.length} items took ${Date.now() - startTime}ms`);
         return filtered;
     }, [filters, carData]);
 
     useEffect(() => {
+        const startTime = Date.now();
+        console.log('Starting KPI calculation and image preloading');
         const currentKPIs = calculateKPIs(filteredData);
 
         if (filters.startDate && filters.endDate) {
             const previousPeriodStart = new Date(filters.startDate.getTime() - (filters.endDate.getTime() - filters.startDate.getTime()));
             const previousPeriodEnd = new Date(filters.startDate);
+            const prevFilterStartTime = Date.now();
+            console.log('Starting previous period filtering');
             const previousPeriodData = applyFiltersToData(carData, { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
+            console.log(`Previous period filtering completed in ${Date.now() - prevFilterStartTime}ms`);
             const previousKPIs = calculateKPIs(previousPeriodData);
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
             setKpiComparison(comparison);
@@ -161,7 +179,13 @@ export default function Dashboard() {
         }
 
         // Preload images for the filtered data
-        preloadImages(filteredData).then(setPreloadedImages);
+        const imagePreloadStartTime = Date.now();
+        console.log('Starting image preloading');
+        preloadImages(filteredData).then((images) => {
+            setPreloadedImages(images);
+            console.log(`Image preloading completed in ${Date.now() - imagePreloadStartTime}ms`);
+        });
+        console.log(`KPI calculation and image preloading completed in ${Date.now() - startTime}ms`);
     }, [filters, filteredData, carData]);
 
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
