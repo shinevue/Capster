@@ -1,6 +1,9 @@
 "use client";
 
 import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
+import { ChartToggleButton } from '@/components/chartToggleButton';
+import { FaChartLine, FaListUl, FaShoppingCart } from 'react-icons/fa'; // Updated import
+
 
 import {
   Card,
@@ -18,7 +21,7 @@ import {
 
 import { CarData } from '@/types/CarData';
 import { useMediaQuery } from "react-responsive";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 interface LineChartMultiComponentProps {
   data: CarData[];
@@ -50,6 +53,8 @@ const parseDate = (dateString: string | null | undefined): Date | null => {
 
 export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = ({data, label}) => {
   const isMobile = useMediaQuery({ maxWidth: 767 });
+  const [show7DayMA, setShow7DayMA] = useState(false);
+  const [show30DayMA, setShow30DayMA] = useState(false);
 
   const { chartData } = useMemo(() => {
     const counts: Record<string, {
@@ -153,7 +158,25 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
     <Card>
       <CardHeader>
         <CardTitle>{label}</CardTitle>
-        <CardDescription>{isMobile ? "" : "Average Price"}</CardDescription>
+        <CardDescription className="flex w-full items-center justify-between">
+          {isMobile ? "" : "Average Price"}
+          <div className="flex gap-6">
+            <ChartToggleButton
+              icon={<FaChartLine />}
+              label="7-Day MA"
+              isActive={show7DayMA}
+              onClick={() => setShow7DayMA(!show7DayMA)}
+              color="bg-green-500"
+            />
+            <ChartToggleButton
+              icon={<FaChartLine />}
+              label="30-Day MA"
+              isActive={show30DayMA}
+              onClick={() => setShow30DayMA(!show30DayMA)}
+              color="bg-yellow-500"
+            />
+          </div>
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-0 pr-4 sm5:p-6">
         <ChartContainer config={chartConfig} className="h-48 sm5:h-96 w-full">
@@ -190,22 +213,69 @@ export const LineChartComponentMulti: React.FC<LineChartMultiComponentProps> = (
             {/* <Legend /> */}
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             {label == "Listing Data" && (
-              <Line
-                dataKey="averageListedPrice"
-                type="monotone"
-                stroke="var(--color-averageListedPrice)"
-                strokeWidth={2}
-                dot={false}
-              />
+              <>
+                <Line
+                  dataKey="averageListedPrice"
+                  type="monotone"
+                  stroke="var(--color-averageListedPrice)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                {show7DayMA && (
+                  <Line
+                    type="monotone"
+                    dataKey="listedMa7"
+                    stroke="#10b981"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Listed 7-Day MA"
+                  />
+                )}
+                {show30DayMA && (
+                  <Line
+                    type="monotone"
+                    dataKey="listedMa30"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Listed 30-Day MA"
+                  />
+                )}
+              </>
             )}
             {label == "Sale Data" && (
-              <Line
-                dataKey="averageSoldPrice"
-                type="monotone"
-                stroke="var(--color-averageSoldPrice)"
-                strokeWidth={2}
-                dot={false}
-              />
+              <>
+                <Line
+                  dataKey="averageSoldPrice"
+                  type="monotone"
+                  stroke="#4747aa"
+                  strokeWidth={2}
+                  dot={false}
+                />
+
+                {show7DayMA && (
+                  <>
+                    <Line
+                      type="monotone"
+                      dataKey="soldMa7"
+                      stroke="#14b8a6"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Sold 7-Day MA"
+                    />
+                  </>
+                )}
+                {show30DayMA && (
+                  <Line
+                    type="monotone"
+                    dataKey="soldMa30"
+                    stroke="#d97706"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Sold 30-Day MA"
+                  />
+                )}
+              </>
             )}
           </LineChart>
         </ChartContainer>

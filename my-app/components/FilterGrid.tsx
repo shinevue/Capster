@@ -100,8 +100,8 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleRes
 
     return (
         <div className='w-full'>
-            <div className="w-full flex-col sm5:flex-row flex gap-6 items-center">
-                <div className='flex flex-col sm5:flex-row w-full gap-3'>
+            <div className="w-full flex-col sm:flex-row flex gap-6 items-center">
+                <div className='flex flex-col sm:flex-row w-full gap-3'>
                     {Object.entries(filterConfig).map(([key, config]) => {
                         if (!includedFilters?.includes(key as keyof Filters)) return null;
 
@@ -139,7 +139,7 @@ export function FilterGrid({ data, currentFilters, handleFilterChange, handleRes
                     })}
                 </div>
                 {(handleSubmit || handleResetFilters) && (
-                    <div className='flex w-full sm5:w-1/4 gap-3'>
+                    <div className='flex w-full sm:w-1/4 gap-3'>
                         <div className='w-full'>
                             <motion.button
                                 className="w-full bg-blue-500 text-white px-5 py-2 rounded-md hover:bg-blue-600 transition-colors"
