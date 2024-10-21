@@ -48,9 +48,9 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     // Preload images
     useEffect(() => {
         scatterData.forEach(car => {
-            if (car.image) {
+            if (car.main_image) {
                 const img = new Image();
-                img.src = car.image;
+                img.src = car.main_image;
             }
         });
     }, [scatterData]);
@@ -81,9 +81,9 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
             }
             return (
                 <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-                    {data.image && (
+                    {data.main_image && (
                         <img
-                            src={imageLoader(data.image)}
+                            src={imageLoader(data.main_image)}
                             alt={`${data.year} ${data.make} ${data.model}`}
                             className="w-full object-cover mb-2 rounded"
                             style={{ height: '200px' }}
