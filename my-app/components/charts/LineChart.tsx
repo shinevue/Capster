@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { CarData } from '@/types/CarData';
 import { useMediaQuery } from 'react-responsive'; // Add this import
 import { motion } from 'framer-motion';
@@ -50,7 +50,9 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
     const [show7DayMA, setShow7DayMA] = useState(false);
     const [show30DayMA, setShow30DayMA] = useState(false);
 
-    const { chartData } = useMemo(() => {
+    const isMobile = useMediaQuery({ maxWidth: 767 });
+
+    const { chartData, isDataSuitable } = useMemo(() => {
         const counts: Record<string, {
             listedCount: number;
             listedTotalPrice: number;
@@ -103,6 +105,38 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
             }))
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+        // Fill in missing dates with previous day's values
+        const filledChartData = [];
+        const startDate = new Date(chartData[0].date);
+        const endDate = new Date(chartData[chartData.length - 1].date);
+
+        let previousData = null;
+        for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+            const currentDate = d.toISOString().split('T')[0];
+            const existingData = chartData.find(item => item.date === currentDate);
+            if (existingData) {
+                filledChartData.push(existingData);
+                previousData = existingData;
+            } else if (previousData) {
+                filledChartData.push({
+                    ...previousData,
+                    date: currentDate,
+                    listedCount: 0,
+                    soldCount: 0,
+                });
+            } else {
+                filledChartData.push({
+                    date: currentDate,
+                    listedCount: 0,
+                    soldCount: 0,
+                    averageListedPrice: null,
+                    averageSoldPrice: null,
+                    minPrice: null,
+                    maxPrice: null,
+                });
+            }
+        }
+
         // Calculate moving averages (update this to include both listed and sold prices)
         const calculateMA = (data: any[], days: number) => {
             return data.map((entry, index, array) => {
@@ -119,31 +153,25 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
             });
         };
 
-        const dataWithMA = calculateMA(calculateMA(chartData, 7), 30);
+        const dataWithMA = calculateMA(calculateMA(filledChartData, 7), 30);
+
+        const isDataSuitable = dataWithMA.some(entry => entry.averageListedPrice !== null || entry.averageSoldPrice !== null);
 
         return {
             chartData: dataWithMA,
-            entriesInTimeRange: data.length,
-            totalEntries: data.length
+            isDataSuitable
         };
     }, [data]);
-
-    const isDataSuitable = useMemo(() => {
-        const validDataPoints = chartData.filter(entry => entry.averageListedPrice !== null || entry.averageSoldPrice !== null);
-        return validDataPoints.length > 0;
-    }, [chartData]);
 
     const formatXAxis = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
-
     const formatYAxis = (value: number) => formatPrice(value);
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = useCallback(({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
-            const isMobile = useMediaQuery({ maxWidth: 767 });
 
             if (isMobile) {
                 return (
@@ -200,9 +228,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
             );
         }
         return null;
-    };
-
-    const isMobile = useMediaQuery({ maxWidth: 767 });
+    }, [showListedLine, showSoldLine, show7DayMA, show30DayMA, isMobile]);
 
     if (!isDataSuitable) {
         return (
@@ -276,7 +302,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
                             } as any}
                             width={isMobile ? 50 : 100}
                         />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={CustomTooltip} />
                         <Legend />
                         {showListedLine && (
                             <Line
@@ -287,6 +313,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
                                 dot={{ r: 5, strokeWidth: 2 }}
                                 activeDot={{ r: 9, strokeWidth: 0 }}
                                 name="Average Listed Price"
+                                connectNulls={true}
                             />
                         )}
                         {showSoldLine && (
@@ -298,6 +325,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
                                 dot={{ r: 5, strokeWidth: 2 }}
                                 activeDot={{ r: 9, strokeWidth: 0 }}
                                 name="Average Sold Price"
+                                connectNulls={true}
                             />
                         )}
                         {show7DayMA && (
