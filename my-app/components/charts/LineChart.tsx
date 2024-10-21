@@ -107,8 +107,8 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data, on
 
         // Fill in missing dates with previous day's values
         const filledChartData = [];
-        const startDate = new Date(chartData[0].date);
-        const endDate = new Date(chartData[chartData.length - 1].date);
+        const startDate = new Date(chartData[0]?.date);
+        const endDate = new Date(chartData[chartData.length - 1]?.date);
 
         let previousData = null;
         for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
