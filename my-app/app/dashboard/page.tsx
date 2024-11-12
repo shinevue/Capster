@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { FilterSection } from "@/components/dashboard/FilterSection";
-import { ChartSection } from "@/components/dashboard/ChartSection";
 import { DataTableSection } from "@/components/dashboard/DataTableSection";
 import KPICards from "@/components/KPICards";
 import { CarData, Filters } from '@/types/CarData';
@@ -13,12 +12,16 @@ import { preloadImages } from '@/lib/imageLoader';
 import { useAuth } from '../providers/AuthProvider';
 import { useRouter } from "next/navigation";
 import { FilterGrid } from '@/components/FilterGrid';
+import { LineChartComponentMulti } from "@/components/charts/LineChartMulti";
+import { ScatterChartComponent } from "@/components/charts/ScatterChart";
 import { fetchCarDataByFilters, fetchFilteredUniqueValues, fetchUniqueFilterValues } from '@/lib/carData';
 import { motion } from 'framer-motion';
+import { useMediaQuery } from 'react-responsive';
 
 export default function Dashboard() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const router = useRouter();
+    const isMobile = useMediaQuery({ maxWidth: 767 });
 
     useEffect(() => {
         if (!isAuthLoading && !user) {
@@ -107,12 +110,14 @@ export default function Dashboard() {
         try {
             const { make, model, trim, year } = newFilters;
 
+            const fetchStartTime = Date.now();
             const data = await fetchCarDataByFilters(
                 make ? make : null,
                 model ? model : null,
                 trim ? trim : null,
                 year ? year.map(y => parseInt(y.toString())) : null
             );
+
             setCarData(data);
             setFilters(newFilters);
         } catch (error) {
@@ -152,6 +157,7 @@ export default function Dashboard() {
         if (filters.startDate && filters.endDate) {
             const previousPeriodStart = new Date(filters.startDate.getTime() - (filters.endDate.getTime() - filters.startDate.getTime()));
             const previousPeriodEnd = new Date(filters.startDate);
+            const prevFilterStartTime = Date.now();
             const previousPeriodData = applyFiltersToData(carData, { ...filters, startDate: previousPeriodStart, endDate: previousPeriodEnd });
             const previousKPIs = calculateKPIs(previousPeriodData);
             const comparison = calculateKPIComparison(currentKPIs, previousKPIs);
@@ -161,12 +167,14 @@ export default function Dashboard() {
         }
 
         // Preload images for the filtered data
-        preloadImages(filteredData).then(setPreloadedImages);
+        preloadImages(filteredData).then((images) => {
+            setPreloadedImages(images);
+        });
     }, [filters, filteredData, carData]);
 
     const imageLoader = useCallback((src: string) => preloadedImages[src] || src, [preloadedImages]);
 
-    const topFilters: (keyof Filters)[] = ['make', 'model', 'trim', 'year'];
+    const topFilters: (keyof Filters)[] = ['year', 'make', 'model', 'trim'];
 
     const handleSubmit = () => {
         handleSearch(filters);
@@ -182,36 +190,25 @@ export default function Dashboard() {
 
         setFilters(initialFilters);
         setCarData([]);
-        // updateUniqueFilterValues(initialFilters);
+        updateUniqueFilterValues(initialFilters);
     }, []);
 
     return (
         <DashboardLayout>
-            <div className="flex md:flex-row flex-col justify-between align-center items-center mb-4">
+            <div className="flex md:flex-row flex-col justify-between align-center items-center mb-4 bg-white p-6 rounded-md">
                 <FilterGrid
                     data={filteredData}
                     currentFilters={filters}
                     handleFilterChange={handleFilterChange}
                     handleSubmit={handleSubmit}
+                    handleResetFilters={handleResetFilters}
                     includedFilters={topFilters}
                     isLoading={isLoading}
                     uniqueFilterValues={uniqueFilterValues}
                 />
-                <motion.button
-                    className="reset-button bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleResetFilters}
-                >
-                    Reset Filters
-                </motion.button>
             </div>
 
-            <div className="mt-5 mb-10">
-                {kpiComparison && <KPICards kpiComparison={kpiComparison} hasMore={false} />}
-            </div>
-
-            <div className='mb-10'>
+            <div className='mb-10 bg-white p-0 md:p-6 rounded-md'>
                 <FilterSection
                     filteredData={filteredData}
                     filters={filters}
@@ -221,11 +218,56 @@ export default function Dashboard() {
                 />
             </div>
 
-            <ChartSection
-                filteredData={filteredData}
-                filters={filters}
-                imageLoader={imageLoader}
-            />
+            <div className="mb-4">
+                {kpiComparison && <KPICards data={filteredData} kpiComparison={kpiComparison} hasMore={false} kpiTitle={"sale"}/>}
+            </div>
+
+            <div className="mb-16"  >
+                <div className="flex flex-col px-1 md:px-0">
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className={`bg-white dark:bg-gray-800 rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                    >
+                        <LineChartComponentMulti data={filteredData} label='Sale Data' />
+                    </motion.div>
+                </div>
+            </div>
+
+            <div className="mb-4">
+                {kpiComparison && <KPICards data={filteredData} kpiComparison={kpiComparison} hasMore={false} kpiTitle={"list"} />}
+            </div>
+
+            <div className="mb-16"  >
+                <div className="flex flex-col gap-4 px-1 md:px-0">
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className={`bg-white dark:bg-gray-800 rounded-3xl sm5:rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                    >
+                        <LineChartComponentMulti data={filteredData} label='Listing Data' />
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className={`bg-white dark:bg-gray-800 rounded-3xl sm5:rounded-md shadow-md ${isMobile ? "w-full" : "p-6"}`}
+                    >
+                        <ScatterChartComponent
+                            data={filteredData}
+                            onTimeSelection={() => { }}
+                            onDataSelection={() => { }}
+                            startDate={filters.startDate}
+                            endDate={filters.endDate}
+                            imageLoader={imageLoader}
+                        />
+                    </motion.div>
+                </div>
+
+            </div>
 
             <DataTableSection
                 filteredData={filteredData}

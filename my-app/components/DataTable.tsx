@@ -54,7 +54,7 @@ const DataTable = <T extends Record<string, any>>({
 
     const ITEMS_PER_PAGE = 20;
 
-    const mobileColumns: (keyof CarData)[] = ['image', 'make', 'model', 'year', 'price'];
+    const mobileColumns: (keyof CarData)[] = ['main_image', 'make', 'model', 'year', 'price'];
 
     const tableColumns: ColumnDef<CarData>[] = (isMobile ? mobileColumns : columns).map(column => {
         const baseColumnDef = {
@@ -86,14 +86,14 @@ const DataTable = <T extends Record<string, any>>({
             },
         };
 
-        if (column === 'image') {
+        if (column === 'main_image') {
             return {
                 ...baseColumnDef,
                 header: () => (
                     <b>Image</b>
                 ),
                 cell: ({ row }: { row: any; }) => {
-                    const image = row.original.image;
+                    const image = row.original.main_image;
                     return (
                         <div className='w-[75px] h-[50px] rounded flex items-center justify-center mx-auto'>
                             {image ? (

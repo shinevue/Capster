@@ -5,6 +5,14 @@ import { useMemo, useEffect } from 'react';
 import { CarData } from '@/types/CarData';
 import { useMediaQuery } from 'react-responsive';
 
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+
 interface ScatterChartComponentProps {
     data: CarData[];
     onDataSelection: (data: CarData[]) => void;
@@ -48,9 +56,9 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     // Preload images
     useEffect(() => {
         scatterData.forEach(car => {
-            if (car.image) {
+            if (car.main_image) {
                 const img = new Image();
-                img.src = car.image;
+                img.src = car.main_image;
             }
         });
     }, [scatterData]);
@@ -81,9 +89,9 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
             }
             return (
                 <div className="custom-tooltip bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-                    {data.image && (
+                    {data.main_image && (
                         <img
-                            src={imageLoader(data.image)}
+                            src={imageLoader(data.main_image)}
                             alt={`${data.year} ${data.make} ${data.model}`}
                             className="w-full object-cover mb-2 rounded"
                             style={{ height: '200px' }}
@@ -116,73 +124,80 @@ export const ScatterChartComponent = ({ data, onDataSelection, onTimeSelection, 
     }
 
     return (
-        <div className="relative w-full">
-            <div className="w-full h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart margin={isMobile ? { top: 20, right: 10, left: 0, bottom: 20 } : { top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
-                        <XAxis
-                            dataKey="x"
-                            name="Date"
-                            tickFormatter={formatXAxis}
-                            type="number"
-                            domain={['dataMin', 'dataMax']}
-                            stroke="#555555"
-                            fontSize={isMobile ? 10 : 14}
-                            tickLine={false}
-                            axisLine={false}
-                            padding={{ left: isMobile ? 0 : 30, right: isMobile ? 0 : 30 }}
-                            interval="preserveStartEnd"
-                            minTickGap={isMobile ? 30 : 50}
-                        />
-                        <YAxis
-                            dataKey="y"
-                            name="Price"
-                            tickFormatter={formatYAxis}
-                            stroke="#555555"
-                            fontSize={isMobile ? 10 : 14}
-                            tickLine={false}
-                            axisLine={false}
-                            label={isMobile ? null : { value: 'Price', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 } as any}
-                            tick={{
-                                textAnchor: 'end',
-                                angle: -45,
-                                dx: -10
-                            } as any}
-                            width={isMobile ? 50 : 100}
-                        />
-                        <ZAxis dataKey="z" range={[20, 60]} name="Mileage" />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Legend />
-                        <Scatter name="Listed Cars" data={scatterData.filter(car => !car.isSold)} fill="#3b82f6" shape="circle">
-                            {scatterData.filter(car => !car.isSold).map((entry, index) => (
-                                <circle
-                                    key={`circle-listed-${index}`}
-                                    cx={0}
-                                    cy={0}
-                                    r={isMobile ? 5 : 7}
-                                    fill="#3b82f6"
-                                    fillOpacity={0.6}
-                                    stroke="#3b82f6"
+        <Card>
+            <CardHeader>
+                <CardTitle>{" "}</CardTitle>
+                <CardDescription>{isMobile ? "" : "Price"}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="relative w-full">
+                    <div className="w-full h-80 sm5:h-[400px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ScatterChart margin={isMobile ? { top: 20, right: 10, left: 0, bottom: 20 } : { top: 20, right: 30, left: 20, bottom: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#888888" opacity={0.2} />
+                                <XAxis
+                                    dataKey="x"
+                                    name="Date"
+                                    tickFormatter={formatXAxis}
+                                    type="number"
+                                    domain={['dataMin', 'dataMax']}
+                                    stroke="#555555"
+                                    fontSize={isMobile ? 10 : 14}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    padding={{ left: isMobile ? 0 : 30, right: isMobile ? 0 : 30 }}
+                                    interval="preserveStartEnd"
+                                    minTickGap={isMobile ? 30 : 50}
                                 />
-                            ))}
-                        </Scatter>
-                        <Scatter name="Sold Cars" data={scatterData.filter(car => car.isSold)} fill="#ef4444" shape="circle">
-                            {scatterData.filter(car => car.isSold).map((entry, index) => (
-                                <circle
-                                    key={`circle-sold-${index}`}
-                                    cx={0}
-                                    cy={0}
-                                    r={isMobile ? 5 : 7}
-                                    fill="#ef4444"
-                                    fillOpacity={0.6}
-                                    stroke="#ef4444"
+                                <YAxis
+                                    dataKey="y"
+                                    name="Price"
+                                    tickFormatter={formatYAxis}
+                                    stroke="#555555"
+                                    fontSize={isMobile ? 10 : 14}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    label={isMobile ? null : { value: '', angle: -90, position: 'insideLeft', fill: '#555555', fontSize: 16 } as any}
+                                    tick={{
+                                        textAnchor: 'end',
+                                        dx: -10
+                                    } as any}
+                                    width={isMobile ? 50 : 100}
                                 />
-                            ))}
-                        </Scatter>
-                    </ScatterChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
+                                <ZAxis dataKey="z" range={[20, 60]} name="Mileage" />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Legend />
+                                <Scatter name="Listed Cars" data={scatterData.filter(car => !car.isSold)} fill="#3b82f6" shape="circle">
+                                    {scatterData.filter(car => !car.isSold).map((entry, index) => (
+                                        <circle
+                                            key={`circle-listed-${index}`}
+                                            cx={0}
+                                            cy={0}
+                                            r={isMobile ? 5 : 7}
+                                            fill="#3b82f6"
+                                            fillOpacity={0.6}
+                                            stroke="#3b82f6"
+                                        />
+                                    ))}
+                                </Scatter>
+                                <Scatter name="Sold Cars" data={scatterData.filter(car => car.isSold)} fill="#ef4444" shape="circle">
+                                    {scatterData.filter(car => car.isSold).map((entry, index) => (
+                                        <circle
+                                            key={`circle-sold-${index}`}
+                                            cx={0}
+                                            cy={0}
+                                            r={isMobile ? 5 : 7}
+                                            fill="#ef4444"
+                                            fillOpacity={0.6}
+                                            stroke="#ef4444"
+                                        />
+                                    ))}
+                                </Scatter>
+                            </ScatterChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 };

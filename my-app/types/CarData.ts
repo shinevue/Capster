@@ -12,8 +12,7 @@ export interface CarData {
     transmission: string | null;
     drivetrain: string | null;
     listing_type: string | null;
-    photos: string;
-    image: string | null;
+    main_image: string | null;
     url: string | null;
     date_sold?: string | null;
 }

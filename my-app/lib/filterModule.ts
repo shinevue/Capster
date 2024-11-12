@@ -66,19 +66,6 @@ export const getActiveFilters = (filters: Filters): [string, any][] => {
 
 export const applyFiltersToData = (data: CarData[], filters: Filters): CarData[] => {
     return data.filter((car: CarData) => {
-        // Convert photos JSON string and get first image URL
-        if (typeof car.photos == 'string') {
-            try {
-                const photosArray = JSON.parse(car.photos);
-                car.image = photosArray[0] || null;
-            } catch (error) {
-                console.error('Error parsing photos JSON:', error);
-                car.image = null;
-            }
-        } else {
-            car.image = null;
-        }
-
         // Parse the dates in "dd/mm/yy" format
         const parseDate = (dateString: string | null | undefined): Date | null => {
             if (!dateString) return null;
